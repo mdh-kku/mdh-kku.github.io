@@ -34,6 +34,7 @@ const teamLine = (p: ProjectView) => {
             <h3>{p.name}</h3>
             <p class="summary">{p.summary}</p>
             <p class="label meta">{p.year} · {p.area}</p>
+            {p.next && <p class="next">{p.next}</p>}
             {(p.team.length > 0 || p.contributors.length > 0) && <p class="team">{teamLine(p)}</p>}
             {!p.image && p.link && <a class="pill pill--out learn below" href={p.link}>Learn more<span class="sr-only"> about {p.name}</span></a>}
           </article>
@@ -119,6 +120,12 @@ const teamLine = (p: ProjectView) => {
 
   .meta {
     margin-top: 10px;
+  }
+
+  .next {
+    margin-top: 8px;
+    font-size: 15px;
+    font-weight: 600;
   }
 
   .team {

@@ -61,6 +61,7 @@ describe('home: hero, projects, latest', () => {
     expect(s.indexOf('>Beta<')).toBeLessThan(s.indexOf('>Gamma<'));
   });
   it('shows Learn more only for projects with a link', () => expect(h().match(/>\s*Learn more\s*</g)).toHaveLength(1));
+  it("shows a project's next stage on its card", () => expect(h()).toMatch(/class="next"[^>]*>Next: clinical stage</));
   it('credits contributors on projects, not on People', () => {
     expect(h()).toContain('Zed Outside');
     expect(built('people/index.html')).not.toContain('Zed Outside');
