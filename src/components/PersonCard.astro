@@ -32,7 +32,7 @@ const links = LINKS.filter(([key]) => p.links[key]).map(([key, label]) => ({
   <div class="photo">
     {
       p.photo ? (
-        <Image src={p.photo} alt={p.photoAlt!} width={320} height={320} />
+        <Image src={p.photo} alt={p.photoAlt!} width={320} />
       ) : (
         <span class="initials" aria-hidden="true">
           {initials}

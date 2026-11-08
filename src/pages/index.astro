@@ -1,8 +1,12 @@
 ---
 import Base from '../layouts/Base.astro';
+import Hero from '../components/Hero.astro';
+import Projects from '../components/Projects.astro';
+import Latest from '../components/Latest.astro';
 import { loadSite } from '../lib/content';
 
 const site = await loadSite();
+const hasContact = Boolean(site.email);
 ---
 
 <Base
@@ -10,5 +14,7 @@ const site = await loadSite();
   description="A lab of medical students earning an MSc in Data Science and Health Informatics at the Faculty of Medicine, Khon Kaen University."
   email={site.email}
 >
-  <h1>Medical Data Science &amp; Health Informatics</h1>
+  <Hero photos={site.hero} hasContact={hasContact} />
+  <Projects projects={site.projects} />
+  <Latest updates={site.updates} />
 </Base>

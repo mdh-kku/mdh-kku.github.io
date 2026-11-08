@@ -1,0 +1,148 @@
+---
+import { Image } from 'astro:assets';
+import SectionHeading from './SectionHeading.astro';
+import type { ProjectView } from '../lib/content';
+import { orderProjects } from '../lib/site';
+
+interface Props {
+  projects: ProjectView[];
+}
+
+const projects = orderProjects(Astro.props.projects);
+
+const teamLine = (p: ProjectView) => {
+  const members = p.team.map((m) => m.name).join(', ');
+  const others = p.contributors.join(', ');
+  if (!others) return members;
+  return members ? `${members} with ${others}` : `With ${others}`;
+};
+---
+
+{
+  projects.length > 0 && (
+    <section id="projects" class="container projects">
+      <SectionHeading lead="Projects." sub="What we've built." />
+      <div class="grid">
+        {projects.map((p) => (
+          <article class:list={['card', 'bw', { linked: p.link }]}>
+            {p.image && (
+              <div class="media">
+                <Image src={p.image} alt={p.imageAlt!} width={720} />
+                {p.link && <a class="pill pill--out learn" href={p.link}>Learn more</a>}
+              </div>
+            )}
+            <h3>{p.name}</h3>
+            <p class="summary">{p.summary}</p>
+            <p class="label meta">{p.year} · {p.area}</p>
+            {(p.team.length > 0 || p.contributors.length > 0) && <p class="team">{teamLine(p)}</p>}
+            {!p.image && p.link && <a class="pill pill--out learn below" href={p.link}>Learn more</a>}
+          </article>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+<style>
+  .projects {
+    padding-block: 88px 96px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+    margin-top: 32px;
+  }
+
+  @media (max-width: 899px) {
+    .grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  .card {
+    position: relative;
+  }
+
+  /* Image and pill share one grid cell, so the pill can sit on the photo without its own positioning. */
+  .media {
+    display: grid;
+    /* One cell the size of the frame; without this the row grows to the image's natural height and clips the pill. */
+    grid-template: minmax(0, 1fr) / minmax(0, 1fr);
+    aspect-ratio: 4 / 3;
+    margin-bottom: 14px;
+    overflow: hidden;
+    border-radius: var(--radius);
+  }
+
+  .media > :global(img) {
+    grid-area: 1 / 1;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .media .learn {
+    grid-area: 1 / 1;
+    align-self: end;
+    justify-self: start;
+    margin: 14px;
+    /* The photo's grayscale filter paints it on its own layer; lift the pill above it.
+       z-index works on grid items without `position`, so the stretched ::after still spans the whole card. */
+    z-index: 1;
+  }
+
+  .below {
+    margin-top: 14px;
+  }
+
+  /* One link per card, stretched so the whole card is clickable. */
+  .learn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius);
+  }
+
+  h3 {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+  }
+
+  .summary {
+    margin-top: 6px;
+    color: var(--ink-2);
+  }
+
+  .meta {
+    margin-top: 10px;
+  }
+
+  .team {
+    margin-top: 6px;
+    color: var(--ink-2);
+    font-size: 15px;
+  }
+
+  /* Only cards that go somewhere lift: a moving card that does nothing would mislead. */
+  @media (hover: hover) and (pointer: fine) {
+    .linked {
+      transition: transform 200ms ease;
+    }
+
+    .linked:hover {
+      transform: translateY(-3px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .linked,
+    .linked:hover {
+      transition: none;
+      transform: none;
+    }
+  }
+</style>

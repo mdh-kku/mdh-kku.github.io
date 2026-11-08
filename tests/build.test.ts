@@ -45,3 +45,28 @@ describe('people page', () => {
   });
   it('gives every image a non-empty alt', () => expect(h()).not.toMatch(/<img(?![^>]*\balt="[^"]+")[^>]*>/));
 });
+
+describe('home: hero, projects, latest', () => {
+  const h = () => built('index.html');
+  it('has the full name as the only h1', () => {
+    expect(h().match(/<h1[\s>]/g)).toHaveLength(1);
+    expect(h()).toMatch(/<h1[^>]*>\s*Medical Data Science &amp; Health Informatics\s*<\/h1>/);
+  });
+  it('shows four hero photos', () => expect(h().match(/class="[^"]*\bhero-photo\b/g)).toHaveLength(4));
+  it('orders projects featured first, then newest', () => {
+    const s = h();
+    expect(s.indexOf('>Alpha<')).toBeLessThan(s.indexOf('>Beta<'));
+    expect(s.indexOf('>Beta<')).toBeLessThan(s.indexOf('>Gamma<'));
+  });
+  it('shows Learn more only for projects with a link', () => expect(h().match(/>\s*Learn more\s*</g)).toHaveLength(1));
+  it('credits contributors on projects, not on People', () => {
+    expect(h()).toContain('Zed Outside');
+    expect(built('people/index.html')).not.toContain('Zed Outside');
+  });
+  it('shows the 4 newest updates, newest first', () => {
+    const s = h();
+    expect(s).not.toContain('Update 2024-01-10');
+    expect(s.indexOf('Update 2025-12-03')).toBeLessThan(s.indexOf('Update 2024-06-01'));
+    expect(s).toContain('DEC 2025');
+  });
+});

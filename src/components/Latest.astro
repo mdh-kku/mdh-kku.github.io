@@ -1,0 +1,79 @@
+---
+import SectionHeading from './SectionHeading.astro';
+import type { UpdateView } from '../lib/content';
+import { latestFirst } from '../lib/site';
+
+interface Props {
+  updates: UpdateView[];
+}
+
+const updates = latestFirst(Astro.props.updates);
+const month = (d: Date) =>
+  d.toLocaleDateString('en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' }).toUpperCase();
+---
+
+{
+  updates.length > 0 && (
+    <section id="latest" class="latest dark">
+      <div class="container">
+        <SectionHeading lead="Latest." sub="Awards + updates." />
+        <ol class="list">
+          {updates.map((u) => (
+            <li>
+              <span class="label">{month(u.date)}</span>
+              <div>
+                <h3>{u.title}</h3>
+                <p>{u.detail}</p>
+              </div>
+              {u.sourceUrl && <a class="label source" href={u.sourceUrl}>Source ↗</a>}
+            </li>
+          ))}
+        </ol>
+      </div>
+    </section>
+  )
+}
+
+<style>
+  .latest {
+    padding-block: 88px 96px;
+  }
+
+  .list {
+    margin: 32px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  li {
+    display: grid;
+    grid-template-columns: 140px minmax(0, 1fr) auto;
+    gap: 8px 24px;
+    align-items: baseline;
+    padding-block: 24px;
+    border-top: 1px solid #26262c;
+  }
+
+  h3 {
+    font-size: clamp(1.375rem, 2.6vw, 1.875rem);
+    font-weight: 500;
+    letter-spacing: -0.025em;
+    line-height: 1.1;
+  }
+
+  p {
+    margin-top: 6px;
+    color: #c4c4cc;
+  }
+
+  .source {
+    color: var(--white);
+    text-underline-offset: 4px;
+  }
+
+  @media (max-width: 640px) {
+    li {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>
