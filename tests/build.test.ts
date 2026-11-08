@@ -25,7 +25,12 @@ describe('layout', () => {
     expect(h()).toContain('href="/people/"');
   });
   it('names the institution in the footer', () =>
-    expect(h()).toContain('MDH · Medical Data Science and Health Informatics · Faculty of Medicine, Khon Kaen University, Khon Kaen, Thailand'));
+    expect(h()).toContain('MDH Lab · Laboratory for Medicine, Data &amp; Health · Faculty of Medicine, Khon Kaen University, Khon Kaen, Thailand'));
+  it('uses the lab name in the wordmark and page title', () => {
+    expect(h()).toMatch(/class="wordmark"[^>]*>MDH Lab</);
+    expect(h()).toContain('<title>MDH Lab · Laboratory for Medicine, Data &amp; Health</title>');
+    expect(built('people/index.html')).toContain('<title>People · MDH Lab</title>');
+  });
   it('falls back to Thai fonts', () => {
     for (const f of ['Noto Sans Thai', 'Leelawadee UI', 'Thonburi']) expect(builtCss()).toContain(f);
   });
@@ -52,7 +57,8 @@ describe('home: hero, projects, latest', () => {
   const h = () => built('index.html');
   it('has the full name as the only h1', () => {
     expect(h().match(/<h1[\s>]/g)).toHaveLength(1);
-    expect(h()).toMatch(/<h1[^>]*>\s*Medical Data Science &amp; Health Informatics\s*<\/h1>/);
+    const text = h().match(/<h1[^>]*>([\s\S]*?)<\/h1>/)![1].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    expect(text).toBe('Laboratory for Medicine, Data &amp; Health');
   });
   it('shows four hero photos', () => expect(h().match(/class="[^"]*\bhero-photo\b/g)).toHaveLength(4));
   it('orders projects featured first, then newest', () => {
@@ -92,8 +98,8 @@ describe('home: we work on, in progress, work with us, about', () => {
   });
   it('counts theses', () => expect(h()).toContain('Four theses underway.'));
   it('builds both mailto links', () => {
-    expect(h()).toContain('mailto:lab@example.org?subject=Collaboration%20with%20MDH');
-    expect(h()).toContain('mailto:lab@example.org?subject=Funding%20for%20MDH');
+    expect(h()).toContain('mailto:lab@example.org?subject=Collaboration%20with%20MDH%20Lab');
+    expect(h()).toContain('mailto:lab@example.org?subject=Funding%20for%20MDH%20Lab');
   });
   it('shows the about lead', () =>
     expect(h()).toContain('Four medical students earning an MSc in Data Science and Health Informatics alongside the MD'));

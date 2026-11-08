@@ -1,19 +1,19 @@
-# MDH Website
+# MDH Lab Website
 
-A lab website presenting the MDH Lab (one Cohort, their Advisors, and their work) to Partners.
+A lab website presenting MDH Lab (one Cohort, their Advisors, and their work) to Partners.
 
 ## Lab & degree
 
-**MDH**:
-The Lab's short name, standing for Medical Data Science and Health Informatics.
-_Avoid_: using MDH to mean the degree on the site
+**MDH Lab**:
+The Lab's name: in full, "Laboratory for Medicine, Data & Health".
+_Avoid_: bare "MDH" in site copy (it is also the MSc's admission code and the Minnesota Department of Health), "Medical Data Science and Health Informatics" (the old name)
 
 **Lab**:
-The research group the website presents: one Cohort, shown with their Advisors. Full name "Medical Data Science and Health Informatics"; short name MDH.
+The research group the website presents: one Cohort, shown with their Advisors. Named MDH Lab.
 
 **MSc**:
-KKU Faculty of Medicine's Master of Science in Data Science and Health Informatics (วิทยาศาสตรมหาบัณฑิต สาขาวิทยาการข้อมูลและสารสนเทศสุขภาพ), taken by medical students as a dual degree alongside the MD. 10 seats a year.
-_Avoid_: MDH (that's the Lab), dual-degree track
+KKU Faculty of Medicine's Master of Science in Data Science and Health Informatics (วิทยาศาสตรมหาบัณฑิต สาขาวิทยาการข้อมูลและสารสนเทศสุขภาพ), taken by medical students as a dual degree alongside the MD. 10 seats a year. Its admission codes are MDX-MDH and MD02-MDH.
+_Avoid_: MDH Lab (that's the research group), dual-degree track
 
 **Cohort**:
 The students admitted to the MSc (with the MD) in the same year (รุ่น). The site currently covers one cohort of 9 students.

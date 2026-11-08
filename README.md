@@ -1,6 +1,6 @@
-# MDH website
+# MDH Lab website
 
-The website of **MDH: Medical Data Science and Health Informatics**, Faculty of Medicine, Khon Kaen University.
+The website of **MDH Lab: Laboratory for Medicine, Data & Health**, Faculty of Medicine, Khon Kaen University. Its members are medical students earning an MSc in Data Science and Health Informatics alongside the MD.
 
 Every person, advisor, project, update and hero photo is one small file in `src/content/`. The site builds every page from those files, so you never edit the same fact in two places. The build also checks the files: if something required is missing, it stops and tells you which file to fix, so nothing half-finished can go live.
 

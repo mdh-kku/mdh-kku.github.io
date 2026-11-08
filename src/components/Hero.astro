@@ -24,7 +24,7 @@ const shown = heroPhotosToShow(photos);
   }
   <div class="container text">
     <p class="label">Faculty of Medicine · Khon Kaen University</p>
-    <h1>Medical Data Science &amp; Health Informatics</h1>
+    <h1><span class="pre">Laboratory for</span> Medicine, <br />Data &amp; <br />Health</h1>
     <div class="actions">
       <a class="pill" href="#projects">See our projects</a>
       {hasContact && <a class="pill pill--out" href="#work-with-us">Work with us</a>}
@@ -50,13 +50,25 @@ const shown = heroPhotosToShow(photos);
     position: relative;
   }
 
+  /* Centred as a block, lines aligned left, so the first letters spell M-D-H down one edge. */
   h1 {
-    max-width: 760px;
+    display: inline-block;
     margin: 20px auto 30px;
-    font-size: clamp(2.5rem, 6vw, 4.5rem);
-    font-weight: 560;
-    letter-spacing: -0.035em;
-    line-height: 1;
+    font-size: clamp(3rem, 8vw, 6rem);
+    font-weight: 600;
+    letter-spacing: -0.04em;
+    line-height: 0.95;
+    text-align: left;
+  }
+
+  /* LIDS-style contrast: the formal part thin and small, the three words bold. */
+  .pre {
+    display: block;
+    margin-bottom: 0.2em;
+    color: var(--ink-2);
+    font-size: 0.34em;
+    font-weight: 400;
+    letter-spacing: -0.01em;
   }
 
   .actions {
