@@ -1,0 +1,66 @@
+---
+import Base from '../layouts/Base.astro';
+import SectionHeading from '../components/SectionHeading.astro';
+import PersonCard from '../components/PersonCard.astro';
+import AdvisorCard from '../components/AdvisorCard.astro';
+import { loadSite } from '../lib/content';
+import { showSection } from '../lib/site';
+
+const site = await loadSite();
+---
+
+<Base
+  title="People · MDH"
+  description="Students and advisors of MDH, Faculty of Medicine, Khon Kaen University."
+  email={site.email}
+>
+  <div class="container page">
+    <SectionHeading level={1} lead="People." sub="Students and advisors." />
+
+    {
+      showSection(site.people.length) && (
+        <section class="students" aria-label="Students">
+          {site.people.map((p) => (
+            <PersonCard person={p} />
+          ))}
+        </section>
+      )
+    }
+
+    {
+      site.advisors.length > 0 && (
+        <section class="advisors" aria-labelledby="advisors-heading">
+          <h2 class="two-tone" id="advisors-heading">
+            Advisors.
+          </h2>
+          <div class="grid">
+            {site.advisors.map((a) => (
+              <AdvisorCard advisor={a} />
+            ))}
+          </div>
+        </section>
+      )
+    }
+  </div>
+</Base>
+
+<style>
+  .page {
+    padding-block: 56px 96px;
+  }
+
+  .students {
+    margin-top: 40px;
+  }
+
+  .advisors {
+    margin-top: 72px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+    margin-top: 28px;
+  }
+</style>

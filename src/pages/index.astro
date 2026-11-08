@@ -1,10 +1,14 @@
 ---
 import Base from '../layouts/Base.astro';
+import { loadSite } from '../lib/content';
+
+const site = await loadSite();
 ---
 
 <Base
   title="MDH · Medical Data Science and Health Informatics"
   description="A lab of medical students earning an MSc in Data Science and Health Informatics at the Faculty of Medicine, Khon Kaen University."
+  email={site.email}
 >
   <h1>Medical Data Science &amp; Health Informatics</h1>
 </Base>

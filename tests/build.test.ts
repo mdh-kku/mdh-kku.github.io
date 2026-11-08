@@ -29,3 +29,19 @@ describe('layout', () => {
   });
   it('respects reduced motion', () => expect(builtCss()).toContain('prefers-reduced-motion'));
 });
+
+describe('people page', () => {
+  const h = () => built('people/index.html');
+  it('lists every student with an anchor', () => {
+    for (const id of ['ann-a', 'ben-b', 'cara-c', 'dee-d']) expect(h()).toContain(`id="${id}"`);
+  });
+  it('shows the role and field labels', () => {
+    for (const t of ['MD/MSc student', 'Research interest', 'Thesis topic', 'Advisors.']) expect(h()).toContain(t);
+  });
+  it('shows Thai names', () => expect(h()).toContain('แอน'));
+  it('links students to advisors and lists who each supervises', () => {
+    expect(h()).toContain('href="#advisor-adv-one"');
+    expect(h()).toMatch(/Supervises:[^<]*Ann Alpha/);
+  });
+  it('gives every image a non-empty alt', () => expect(h()).not.toMatch(/<img(?![^>]*\balt="[^"]+")[^>]*>/));
+});

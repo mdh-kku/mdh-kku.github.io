@@ -1,0 +1,167 @@
+---
+import { Image } from 'astro:assets';
+import type { PersonView } from '../lib/content';
+
+interface Props {
+  person: PersonView;
+}
+
+const { person: p } = Astro.props;
+
+const initials = p.name
+  .split(/\s+/)
+  .slice(0, 2)
+  .map((w) => w[0])
+  .join('')
+  .toUpperCase();
+
+const LINKS = [
+  ['orcid', 'ORCID'],
+  ['scholar', 'Google Scholar'],
+  ['github', 'GitHub'],
+  ['linkedin', 'LinkedIn'],
+  ['email', 'Email'],
+] as const;
+const links = LINKS.filter(([key]) => p.links[key]).map(([key, label]) => ({
+  label,
+  href: key === 'email' ? `mailto:${p.links.email}` : p.links[key]!,
+}));
+---
+
+<article class="person bw" id={p.id}>
+  <div class="photo">
+    {
+      p.photo ? (
+        <Image src={p.photo} alt={p.photoAlt!} width={320} height={320} />
+      ) : (
+        <span class="initials" aria-hidden="true">
+          {initials}
+        </span>
+      )
+    }
+  </div>
+  <div>
+    <h3>{p.name}</h3>
+    <p class="name-th" lang="th">{p.nameTh}</p>
+    <p class="label role">MD/MSc student</p>
+    <dl>
+      <dt>Research interest</dt>
+      <dd>{p.researchInterest}</dd>
+      <dt>Thesis topic</dt>
+      <dd>{p.thesisTopic}</dd>
+      <dt>{p.advisors.length > 1 ? 'Advisors' : 'Advisor'}</dt>
+      <dd>{p.advisors.map((a, i) => <>{i > 0 && ', '}<a href={`#advisor-${a.id}`}>{a.label}</a></>)}</dd>
+    </dl>
+    {
+      links.length > 0 && (
+        <p class="links">
+          {links.map((l) => (
+            <a href={l.href}>{l.label}</a>
+          ))}
+        </p>
+      )
+    }
+  </div>
+</article>
+
+<style>
+  .person {
+    display: grid;
+    grid-template-columns: 160px minmax(0, 1fr);
+    gap: 32px;
+    padding-block: 32px;
+    border-top: 1px solid var(--line);
+    scroll-margin-top: 24px;
+  }
+
+  .photo :global(img),
+  .initials {
+    width: 160px;
+    height: 160px;
+    border-radius: var(--radius);
+    object-fit: cover;
+  }
+
+  .initials {
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: #e7e9ee;
+    color: var(--ink-2);
+    font-size: 40px;
+    font-weight: 600;
+  }
+
+  h3 {
+    font-size: 24px;
+    font-weight: 650;
+    letter-spacing: -0.015em;
+    line-height: 1.15;
+  }
+
+  .name-th {
+    margin-top: 2px;
+    color: var(--ink-2);
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  .role {
+    margin-top: 10px;
+  }
+
+  dl {
+    display: grid;
+    grid-template-columns: 150px minmax(0, 1fr);
+    gap: 8px 20px;
+    margin: 18px 0 0;
+  }
+
+  dt {
+    color: var(--ink-2);
+    font-size: 15px;
+  }
+
+  dd {
+    margin: 0;
+  }
+
+  a {
+    color: var(--ink);
+    text-underline-offset: 3px;
+  }
+
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+    margin-top: 16px;
+    font-size: 15px;
+  }
+
+  @media (max-width: 640px) {
+    .person {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 16px;
+    }
+
+    .photo :global(img),
+    .initials {
+      width: 96px;
+      height: 96px;
+    }
+
+    .initials {
+      font-size: 28px;
+    }
+
+    dl {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 2px;
+    }
+
+    dd {
+      margin-bottom: 10px;
+    }
+  }
+</style>

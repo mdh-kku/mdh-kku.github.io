@@ -1,0 +1,71 @@
+---
+import { Image } from 'astro:assets';
+import type { AdvisorView } from '../lib/content';
+
+interface Props {
+  advisor: AdvisorView;
+}
+
+const { advisor: a } = Astro.props;
+---
+
+<article class="advisor bw" id={`advisor-${a.id}`}>
+  {
+    a.photo && (
+      <div class="photo">
+        <Image src={a.photo} alt={a.photoAlt!} width={192} height={192} />
+      </div>
+    )
+  }
+  <h3>{a.label}</h3>
+  <p class="label">{a.department}</p>
+  <p class="interest">{a.researchInterest}</p>
+  {a.supervises.length > 0 && <p class="supervises">Supervises: {a.supervises.map((s) => s.name).join(', ')}</p>}
+  {a.profileUrl && <a class="profile" href={a.profileUrl}>Profile ↗</a>}
+</article>
+
+<style>
+  .advisor {
+    padding: 24px;
+    border-radius: var(--radius);
+    background: #f5f7fb;
+    scroll-margin-top: 24px;
+  }
+
+  .photo :global(img) {
+    width: 96px;
+    height: 96px;
+    margin-bottom: 16px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  h3 {
+    font-size: 20px;
+    font-weight: 650;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+  }
+
+  .label {
+    margin-top: 6px;
+  }
+
+  .interest {
+    margin-top: 12px;
+  }
+
+  .supervises {
+    margin-top: 12px;
+    color: var(--ink-2);
+    font-size: 15px;
+  }
+
+  .profile {
+    display: inline-block;
+    margin-top: 12px;
+    color: var(--ink);
+    font-size: 15px;
+    text-underline-offset: 3px;
+  }
+</style>
