@@ -1,0 +1,24 @@
+---
+import Base from '../layouts/Base.astro';
+import SectionHeading from '../components/SectionHeading.astro';
+import { loadSite } from '../lib/content';
+
+const site = await loadSite();
+---
+
+<Base title="Page not found · MDH" description="This page doesn't exist on the MDH website." email={site.email}>
+  <div class="container page">
+    <SectionHeading level={1} lead="Page not found." sub="It may have moved." />
+    <a class="pill pill--out" href="/">Go to the home page →</a>
+  </div>
+</Base>
+
+<style>
+  .page {
+    padding-block: 120px 160px;
+  }
+
+  .pill {
+    margin-top: 28px;
+  }
+</style>

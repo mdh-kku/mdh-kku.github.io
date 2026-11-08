@@ -10,6 +10,8 @@ interface Props {
 }
 
 const { title, description, email } = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const shareImage = new URL('/og.png', Astro.site);
 
 // Roundness pinned at 60 and no optical-size axis: a 45 KB Latin file instead of 204 KB.
 const FONTS =
@@ -23,6 +25,15 @@ const FONTS =
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="sitemap" href="/sitemap.xml" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={shareImage} />
+    <meta name="twitter:card" content="summary_large_image" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href={FONTS} />

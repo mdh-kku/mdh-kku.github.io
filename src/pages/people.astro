@@ -19,7 +19,8 @@ const site = await loadSite();
 
     {
       showSection(site.people.length) && (
-        <section class="students" aria-label="Students">
+        <section class="students" aria-labelledby="students-heading">
+          <h2 class="sr-only" id="students-heading">Students</h2>
           {site.people.map((p) => (
             <PersonCard person={p} />
           ))}

@@ -1,0 +1,32 @@
+<!doctype html>
+<!--
+  Source for public/og.png (the image LINE/Facebook show when someone shares the site).
+  Re-render after editing:  open at exactly 1200×630 and screenshot, e.g.
+  msedge --headless=new --hide-scrollbars --virtual-time-budget=6000 --window-size=1200,630 --screenshot=public/og.png scripts/og.html
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght,ROND@400..700,60&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+  html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; }
+  body {
+    display: flex; flex-direction: column; justify-content: center; padding: 0 96px; box-sizing: border-box;
+    color: #121317; font-family: "Google Sans Flex", system-ui, sans-serif;
+    background:
+      radial-gradient(55% 75% at 22% 18%, #cfe6ff 0%, transparent 62%),
+      radial-gradient(45% 70% at 82% 30%, #7cb4ff 0%, transparent 62%),
+      radial-gradient(40% 60% at 62% 92%, #9fe0ff 0%, transparent 60%),
+      linear-gradient(180deg, #eaf3ff 0%, #ffffff 92%);
+  }
+  .label { font: 500 20px "IBM Plex Mono", monospace; letter-spacing: 0.07em; text-transform: uppercase; color: #45474d; }
+  h1 { margin: 24px 0 0; font-size: 96px; font-weight: 560; letter-spacing: -0.035em; line-height: 0.98; }
+  .mark { margin-top: 36px; font-size: 28px; font-weight: 650; letter-spacing: -0.01em; }
+</style>
+</head>
+<body>
+  <div class="label">Faculty of Medicine · Khon Kaen University</div>
+  <h1>Medical<br>Data Science &amp;<br>Health Informatics</h1>
+  <div class="mark">MDH</div>
+</body>
+</html>

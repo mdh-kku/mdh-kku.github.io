@@ -1,4 +1,6 @@
 import { describe, it, expect } from 'vitest';
+import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { join } from 'node:path';
 import { built, builtCss } from './helpers';
 
 describe('fixture build', () => {
@@ -89,5 +91,34 @@ describe('home: we work on, in progress, work with us, about', () => {
     const s = h();
     const at = ['projects', 'latest', 'we-work-on', 'in-progress', 'work-with-us', 'about'].map(id => s.indexOf(`id="${id}"`));
     expect(at.every((p, i) => p > -1 && (i === 0 || p > at[i - 1]))).toBe(true);
+  });
+});
+
+describe('sharing and hygiene', () => {
+  it('has share tags with an absolute image URL', () => {
+    const s = built('index.html');
+    expect(s).toMatch(/<meta property="og:image" content="https:\/\/[^"]+\/og\.png"/);
+    expect(s).toContain('summary_large_image');
+  });
+  it('lists both pages in the sitemap', () => {
+    const x = built('sitemap.xml');
+    expect(x.match(/<loc>/g)).toHaveLength(2);
+    expect(x).toContain('/people/');
+  });
+  it('has a 404 page', () => expect(built('404.html')).toContain('Page not found.'));
+  it('names the project inside "Learn more" for screen readers and search engines', () =>
+    expect(built('index.html')).toMatch(/Learn more<span class="sr-only"[^>]*> about Alpha<\/span>/));
+  it('keeps heading order on People: an h2 before the student names', () =>
+    expect(built('people/index.html')).toMatch(/<h2[^>]*class="sr-only"[^>]*>Students<\/h2>/));
+  it('has a 1200×630 share image', async () => {
+    const sharp = (await import('sharp')).default;
+    const m = await sharp('public/og.png').metadata();
+    expect([m.width, m.height]).toEqual([1200, 630]);
+  });
+  it('has no placeholder words in src/', () => {
+    const walk = (d: string): string[] => readdirSync(d).flatMap(f => statSync(join(d, f)).isDirectory() ? walk(join(d, f)) : [join(d, f)]);
+    const hits = walk('src').filter(f => /\.(astro|ts|css|md|json)$/.test(f))
+      .filter(f => /\b(lorem|todo|placeholder|tbd)\b/i.test(readFileSync(f, 'utf8')));
+    expect(hits).toEqual([]);
   });
 });
