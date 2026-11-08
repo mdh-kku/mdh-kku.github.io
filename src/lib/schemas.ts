@@ -10,6 +10,12 @@ const text = (min: number, max?: number) => (max ? z.string().min(min).max(max) 
 /** 3–6 lowercase words, shown in the "We work on:" list. */
 const INDEX_PHRASE = /^[a-z0-9'-]+(?: [a-z0-9'-]+){2,5}$/;
 
+/**
+ * Dates must be ISO (2025-12-03). YAML turns those into Date objects; a day-first string like 03/12/2025
+ * is rejected instead of being silently read as March.
+ */
+const isoDate = z.union([z.date(), z.iso.date()]).pipe(z.coerce.date());
+
 /** A photo is only allowed with alt text. */
 const hasAlt = (photo: unknown, alt: unknown) => !photo || (typeof alt === 'string' && alt.length > 0);
 
@@ -22,7 +28,7 @@ export const personSchema = (image: ImageFn, ref: RefFn) =>
       photo: image().optional(),
       photo_alt: z.string().optional(),
       consent: z.literal(true),
-      consent_date: z.coerce.date(),
+      consent_date: isoDate,
       research_interest: text(20, 300),
       index_phrase: z.string().regex(INDEX_PHRASE, 'Use 3–6 lowercase words'),
       thesis_topic: text(10, 160),
@@ -74,7 +80,7 @@ export const projectSchema = (image: ImageFn, ref: RefFn) =>
 export const updateSchema = (ref: RefFn) =>
   z
     .object({
-      date: z.coerce.date(),
+      date: isoDate,
       title: text(1, 90),
       kind: z.enum(['award', 'milestone', 'talk', 'paper']),
       detail: text(1, 160),

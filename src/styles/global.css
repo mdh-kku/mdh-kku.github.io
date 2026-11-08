@@ -28,6 +28,11 @@
   box-sizing: border-box;
 }
 
+/* `hidden` must win over component display rules such as .pill's inline-flex. */
+[hidden] {
+  display: none !important;
+}
+
 body {
   margin: 0;
   background: var(--white);

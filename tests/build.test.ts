@@ -80,7 +80,16 @@ describe('home: we work on, in progress, work with us, about', () => {
     for (const id of ['ann-a', 'ben-b', 'cara-c', 'dee-d']) expect(h()).toContain(`href="/people/#${id}"`);
     expect(h()).not.toMatch(/<li[^>]*class="[^"]*\bon\b/);
   });
-  it('has a pause button', () => expect(h()).toMatch(/<button[^>]*aria-pressed="false"[^>]*>\s*Pause\s*</));
+  it('ships the Pause button hidden until cycling starts, with no conflicting toggle state', () => {
+    expect(h()).toMatch(/<button[^>]*\bhidden\b[^>]*>\s*Pause\s*</);
+    expect(h()).not.toContain('aria-pressed');
+  });
+  it('makes [hidden] win over pill styles', () =>
+    expect(builtCss().replace(/\s/g, '')).toContain('[hidden]{display:none!important}'));
+  it('reflows at 320px: grids never demand more than the screen width (WCAG 1.4.10)', () => {
+    expect(built('people/index.html')).toContain('minmax(min(280px,100%),1fr)');
+    expect(builtCss()).toContain('minmax(min(260px,100%),1fr)');
+  });
   it('counts theses', () => expect(h()).toContain('Four theses underway.'));
   it('builds both mailto links', () => {
     expect(h()).toContain('mailto:lab@example.org?subject=Collaboration%20with%20MDH');

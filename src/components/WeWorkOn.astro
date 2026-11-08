@@ -21,7 +21,7 @@ const { people } = Astro.props;
             </li>
           ))}
         </ul>
-        <button type="button" class="pill pill--out pause" aria-pressed="false" data-pause>
+        <button type="button" class="pill pill--out pause" hidden data-pause>
           Pause
         </button>
       </div>
@@ -30,41 +30,39 @@ const { people } = Astro.props;
 }
 
 <script>
-  // One phrase is highlighted at a time. Without JS, or with reduced motion, every phrase stays equally visible.
+  // One phrase is highlighted at a time. Without JS, or with reduced motion, every phrase stays equally visible
+  // and the Pause button stays hidden: nothing moves, so there is nothing to pause.
   const list = document.querySelector<HTMLElement>('[data-phrases]');
   const button = document.querySelector<HTMLButtonElement>('[data-pause]');
 
-  if (list && button) {
-    if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      button.hidden = true; // nothing moves, so there is nothing to pause
-    } else {
-      const items = [...list.querySelectorAll('li')];
-      let i = 0;
-      let timer: number | undefined;
-      const show = () => items.forEach((li, n) => li.classList.toggle('on', n === i));
-      const start = () => {
-        timer = window.setInterval(() => {
-          i = (i + 1) % items.length;
-          show();
-        }, 3000);
-      };
+  if (list && button && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const items = [...list.querySelectorAll('li')];
+    let i = 0;
+    let timer: number | undefined;
+    const show = () => items.forEach((li, n) => li.classList.toggle('on', n === i));
+    const start = () => {
+      timer = window.setInterval(() => {
+        i = (i + 1) % items.length;
+        show();
+      }, 3000);
+    };
 
-      list.classList.add('cycling');
-      show();
-      start();
+    list.classList.add('cycling');
+    show();
+    start();
+    button.hidden = false;
 
-      button.addEventListener('click', () => {
-        const pausing = timer !== undefined;
-        if (pausing) {
-          clearInterval(timer);
-          timer = undefined;
-        } else {
-          start();
-        }
-        button.setAttribute('aria-pressed', String(pausing));
-        button.textContent = pausing ? 'Play' : 'Pause';
-      });
-    }
+    // The label says what the button will do; no aria-pressed, so screen readers never hear "Play, pressed".
+    button.addEventListener('click', () => {
+      const pausing = timer !== undefined;
+      if (pausing) {
+        clearInterval(timer);
+        timer = undefined;
+      } else {
+        start();
+      }
+      button.textContent = pausing ? 'Play' : 'Pause';
+    });
   }
 </script>
 

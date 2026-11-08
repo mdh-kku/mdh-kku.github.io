@@ -33,6 +33,19 @@ describe('update', () => {
   it('rejects an unknown kind', () => expect(ok(U, { ...base, kind: 'news' })).toBe(false));
 });
 
+describe('dates', () => {
+  const U = updateSchema(ref);
+  const base = { title: 'x', kind: 'milestone', detail: 'x', confirmed_by: 'Gongpop' };
+  it('accepts ISO dates and the Date objects YAML makes from them', () => {
+    expect(ok(U, { ...base, date: '2025-12-03' })).toBe(true);
+    expect(ok(U, { ...base, date: new Date('2025-12-03') })).toBe(true);
+  });
+  it('rejects day-first dates instead of misreading them as another month', () => {
+    expect(ok(U, { ...base, date: '03/12/2025' })).toBe(false);
+    expect(ok(personSchema(img, ref), { ...person, consent_date: '15/11/2026' })).toBe(false);
+  });
+});
+
 describe('advisor, project, site', () => {
   const adv = { name: 'Tess Advisor, MD', title: 'Asst. Prof.', department: 'Medicine', research_interest: 'Clinical informatics and decision support.', consent: true };
   it('advisor needs consent', () => { const { consent: _, ...rest } = adv; expect(ok(advisorSchema(img), rest)).toBe(false); });
