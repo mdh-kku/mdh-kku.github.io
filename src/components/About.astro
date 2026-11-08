@@ -1,0 +1,28 @@
+---
+import { aboutLead } from '../lib/site';
+
+interface Props {
+  count: number;
+}
+
+const { count } = Astro.props;
+---
+
+<section id="about" class="container">
+  <h2 class="two-tone">About MDH.</h2>
+  <p class="lede">{aboutLead(count)}</p>
+  <a class="pill pill--out" href="/people/">Meet the people →</a>
+</section>
+
+<style>
+  section {
+    padding-block: 88px 96px;
+  }
+
+  .lede {
+    max-width: 62ch;
+    margin: 16px 0 24px;
+    font-size: 19px;
+    color: var(--ink-2);
+  }
+</style>

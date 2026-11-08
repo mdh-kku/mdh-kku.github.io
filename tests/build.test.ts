@@ -70,3 +70,24 @@ describe('home: hero, projects, latest', () => {
     expect(s).toContain('DEC 2025');
   });
 });
+
+describe('home: we work on, in progress, work with us, about', () => {
+  const h = () => built('index.html');
+  it('lists every phrase as a link with no JS (Review Focus 4)', () => {
+    for (const id of ['ann-a', 'ben-b', 'cara-c', 'dee-d']) expect(h()).toContain(`href="/people/#${id}"`);
+    expect(h()).not.toMatch(/<li[^>]*class="[^"]*\bon\b/);
+  });
+  it('has a pause button', () => expect(h()).toMatch(/<button[^>]*aria-pressed="false"[^>]*>\s*Pause\s*</));
+  it('counts theses', () => expect(h()).toContain('Four theses underway.'));
+  it('builds both mailto links', () => {
+    expect(h()).toContain('mailto:lab@example.org?subject=Collaboration%20with%20MDH');
+    expect(h()).toContain('mailto:lab@example.org?subject=Funding%20for%20MDH');
+  });
+  it('shows the about lead', () =>
+    expect(h()).toContain('Four medical students earning an MSc in Data Science and Health Informatics alongside the MD'));
+  it('keeps the approved section order', () => {
+    const s = h();
+    const at = ['projects', 'latest', 'we-work-on', 'in-progress', 'work-with-us', 'about'].map(id => s.indexOf(`id="${id}"`));
+    expect(at.every((p, i) => p > -1 && (i === 0 || p > at[i - 1]))).toBe(true);
+  });
+});

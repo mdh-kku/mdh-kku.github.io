@@ -28,8 +28,10 @@ export function thesesHeadline(n: number): string {
 }
 
 export function aboutLead(n: number): string {
+  // Before anyone is added there is no number to show, never "0 medical students".
+  const who = n < 1 ? 'Medical students' : `${cap(numberWord(n))} medical ${n === 1 ? 'student' : 'students'}`;
   return (
-    `${cap(numberWord(n))} medical ${n === 1 ? 'student' : 'students'} earning an MSc in Data Science and Health Informatics ` +
+    `${who} earning an MSc in Data Science and Health Informatics ` +
     'alongside the MD, working with faculty advisors at the Faculty of Medicine, Khon Kaen University.'
   );
 }

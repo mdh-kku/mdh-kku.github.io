@@ -3,10 +3,13 @@ import Base from '../layouts/Base.astro';
 import Hero from '../components/Hero.astro';
 import Projects from '../components/Projects.astro';
 import Latest from '../components/Latest.astro';
+import WeWorkOn from '../components/WeWorkOn.astro';
+import InProgress from '../components/InProgress.astro';
+import WorkWithUs from '../components/WorkWithUs.astro';
+import About from '../components/About.astro';
 import { loadSite } from '../lib/content';
 
 const site = await loadSite();
-const hasContact = Boolean(site.email);
 ---
 
 <Base
@@ -14,7 +17,11 @@ const hasContact = Boolean(site.email);
   description="A lab of medical students earning an MSc in Data Science and Health Informatics at the Faculty of Medicine, Khon Kaen University."
   email={site.email}
 >
-  <Hero photos={site.hero} hasContact={hasContact} />
+  <Hero photos={site.hero} hasContact={Boolean(site.email)} />
   <Projects projects={site.projects} />
   <Latest updates={site.updates} />
+  <WeWorkOn people={site.people} />
+  <InProgress people={site.people} />
+  {site.email && <WorkWithUs email={site.email} />}
+  <About count={site.people.length} />
 </Base>

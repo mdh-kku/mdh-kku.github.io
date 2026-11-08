@@ -1,0 +1,142 @@
+---
+import type { PersonView } from '../lib/content';
+import { showSection } from '../lib/site';
+
+interface Props {
+  people: PersonView[];
+}
+
+const { people } = Astro.props;
+---
+
+{
+  showSection(people.length) && (
+    <section id="we-work-on" class="container">
+      <div class="panel">
+        <h2 class="lead">We work on:</h2>
+        <ul class="phrases" data-phrases>
+          {people.map((p) => (
+            <li>
+              <a href={`/people/#${p.id}`}>{p.indexPhrase}</a>
+            </li>
+          ))}
+        </ul>
+        <button type="button" class="pill pill--out pause" aria-pressed="false" data-pause>
+          Pause
+        </button>
+      </div>
+    </section>
+  )
+}
+
+<script>
+  // One phrase is highlighted at a time. Without JS, or with reduced motion, every phrase stays equally visible.
+  const list = document.querySelector<HTMLElement>('[data-phrases]');
+  const button = document.querySelector<HTMLButtonElement>('[data-pause]');
+
+  if (list && button) {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      button.hidden = true; // nothing moves, so there is nothing to pause
+    } else {
+      const items = [...list.querySelectorAll('li')];
+      let i = 0;
+      let timer: number | undefined;
+      const show = () => items.forEach((li, n) => li.classList.toggle('on', n === i));
+      const start = () => {
+        timer = window.setInterval(() => {
+          i = (i + 1) % items.length;
+          show();
+        }, 3000);
+      };
+
+      list.classList.add('cycling');
+      show();
+      start();
+
+      button.addEventListener('click', () => {
+        const pausing = timer !== undefined;
+        if (pausing) {
+          clearInterval(timer);
+          timer = undefined;
+        } else {
+          start();
+        }
+        button.setAttribute('aria-pressed', String(pausing));
+        button.textContent = pausing ? 'Play' : 'Pause';
+      });
+    }
+  }
+</script>
+
+<style>
+  section {
+    padding-block: 24px;
+  }
+
+  .panel {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 28px;
+    align-items: center;
+    padding: 36px 32px;
+    border-radius: var(--radius);
+    background: #f3f5f9;
+  }
+
+  .lead {
+    font-size: clamp(1.5rem, 2.6vw, 1.875rem);
+    font-weight: 650;
+    letter-spacing: -0.02em;
+  }
+
+  .phrases {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .phrases a {
+    color: var(--ink);
+    font-size: clamp(1.25rem, 2.2vw, 1.5rem);
+    font-weight: 650;
+    letter-spacing: -0.015em;
+    line-height: 1.3;
+    text-decoration: none;
+    transition: color 200ms ease;
+  }
+
+  .phrases a:hover {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+
+  /* Only while cycling are the other phrases dimmed. */
+  .cycling a {
+    color: var(--grey);
+  }
+
+  .cycling .on a {
+    color: var(--ink);
+  }
+
+  .pause {
+    min-width: 76px;
+  }
+
+  @media (max-width: 760px) {
+    .panel {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 16px;
+    }
+
+    .pause {
+      justify-self: start;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .phrases a {
+      transition: none;
+    }
+  }
+</style>

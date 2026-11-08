@@ -21,6 +21,8 @@ describe('display rules', () => {
     expect(s.aboutLead(1).startsWith('One medical student earning')).toBe(true);
     expect(s.aboutLead(9)).toBe('Nine medical students earning an MSc in Data Science and Health Informatics alongside the MD, working with faculty advisors at the Faculty of Medicine, Khon Kaen University.');
   });
+  it('never writes "0 medical students" before anyone is added', () =>
+    expect(s.aboutLead(0)).toBe('Medical students earning an MSc in Data Science and Health Informatics alongside the MD, working with faculty advisors at the Faculty of Medicine, Khon Kaen University.'));
   it('finds who an advisor supervises', () =>
     expect(s.supervisedBy('adv-one', [{ id: 'ann-a', advisorIds: ['adv-one'] }, { id: 'ben-b', advisorIds: ['adv-two'] }])).toEqual(['ann-a']));
   it('builds a mailto link with an encoded subject', () =>
