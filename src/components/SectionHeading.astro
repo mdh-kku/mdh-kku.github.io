@@ -1,0 +1,12 @@
+---
+interface Props {
+  lead: string;
+  sub?: string;
+  level?: 1 | 2;
+}
+
+const { lead, sub, level = 2 } = Astro.props;
+const Tag = level === 1 ? 'h1' : 'h2';
+---
+
+<Tag class="two-tone">{lead}{sub && <> <span>{sub}</span></>}</Tag>

@@ -1,0 +1,26 @@
+---
+interface Props {
+  hasContact: boolean;
+}
+
+const { hasContact } = Astro.props;
+---
+
+<header class="site-header">
+  <div class="container">
+    <a class="wordmark" href="/">MDH</a>
+    <nav class="site-nav" aria-label="Main">
+      <a href="/#projects">Projects</a>
+      <a href="/people/">People</a>
+      <a href="/#latest">Latest</a>
+    </nav>
+    {
+      hasContact && (
+        <div class="header-actions">
+          <a class="pill pill--out" href="#contact">Contact</a>
+          <a class="pill" href="/#work-with-us">Work with us</a>
+        </div>
+      )
+    }
+  </div>
+</header>

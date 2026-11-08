@@ -1,0 +1,16 @@
+---
+interface Props {
+  email?: string;
+}
+
+const { email } = Astro.props;
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer dark">
+  <div class="container">
+    <p>MDH · Medical Data Science and Health Informatics · Faculty of Medicine, Khon Kaen University, Khon Kaen, Thailand</p>
+    {email && <a id="contact" href={`mailto:${email}`}>{email}</a>}
+    <p>© {year}</p>
+  </div>
+</footer>

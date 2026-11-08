@@ -1,0 +1,257 @@
+/* MDH "Day & Night": tokens and shared pieces. Values come from the approved design spec, section 8. */
+
+:root {
+  --ink: #121317;
+  --ink-2: #45474d;
+  --grey: #6b6e76; /* second line of two-tone headings on white (5.1:1) */
+  --grey-on-black: #9a9aa6; /* same, on black (7.4:1) */
+  --black: #000;
+  --white: #fff;
+  --sky-1: #eaf3ff;
+  --sky-2: #cfe6ff;
+  --sky-3: #7cb4ff;
+  --sky-4: #9fe0ff;
+  --fade-end: #eef5ff;
+  --line: rgba(18, 19, 23, 0.18);
+  --focus: #0039a6;
+  --focus-on-black: #9fe0ff;
+  --radius: 24px;
+  --sans: "Google Sans Flex", "Noto Sans Thai", "Leelawadee UI", Thonburi, system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, monospace;
+  /* Strong ease-out: responsive at the start, calm at the end. */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--white);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 17px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* Long romanised names must wrap instead of pushing the page sideways. */
+h1,
+h2,
+h3,
+p,
+li,
+dd {
+  overflow-wrap: anywhere;
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+
+.container {
+  max-width: 1180px;
+  margin-inline: auto;
+  padding-inline: 48px;
+}
+
+@media (max-width: 600px) {
+  .container {
+    padding-inline: 20px;
+  }
+}
+
+/* Two-tone section headings: a statement line and a grey line. */
+.two-tone {
+  font-size: clamp(1.875rem, 3.5vw, 2.625rem);
+  font-weight: 650;
+  letter-spacing: -0.03em;
+  line-height: 1.02;
+}
+
+.two-tone span {
+  display: block;
+  color: var(--grey);
+}
+
+.label {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+
+/* Pills: the only button style. */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0 18px;
+  border-radius: 9999px;
+  background: var(--ink);
+  color: var(--white);
+  font: 500 15px/1 var(--sans);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: transform 160ms var(--ease-out);
+}
+
+.pill:active {
+  transform: scale(0.98);
+}
+
+.pill--out {
+  background: var(--white);
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+/* Black bands (Latest, footer). */
+.dark {
+  background: var(--black);
+  color: var(--white);
+}
+
+.dark .two-tone span,
+.dark .label {
+  color: var(--grey-on-black);
+}
+
+.dark :focus-visible {
+  outline-color: var(--focus-on-black);
+}
+
+.dark .pill {
+  background: var(--white);
+  color: var(--black);
+}
+
+.dark .pill--out {
+  background: transparent;
+  color: var(--white);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.28);
+}
+
+/* Photos are black-and-white until hovered (mouse only) or focused. This makes mixed phone photos look like one set. */
+.bw img {
+  filter: grayscale(1) contrast(1.05);
+  transition: filter 200ms ease;
+}
+
+.bw:focus-within img {
+  filter: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .bw:hover img {
+    filter: none;
+  }
+}
+
+/* Skip link: hidden until focused. */
+.skip {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 10;
+  transform: translateY(-200%);
+}
+
+.skip:focus {
+  transform: none;
+}
+
+/* Header */
+.site-header .container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 28px;
+  min-height: 72px;
+  padding-block: 12px;
+}
+
+.wordmark {
+  color: var(--ink);
+  font-size: 21px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+}
+
+.site-nav {
+  display: flex;
+  gap: 28px;
+}
+
+.site-nav a {
+  color: var(--ink);
+  font-size: 15px;
+  text-decoration: none;
+}
+
+.site-nav a:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
+@media (max-width: 720px) {
+  .site-nav {
+    order: 3;
+    width: 100%;
+  }
+}
+
+/* Footer */
+.site-footer {
+  padding-block: 48px;
+  font-size: 15px;
+}
+
+.site-footer .container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px 28px;
+}
+
+.site-footer a {
+  color: var(--white);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pill,
+  .bw img {
+    transition: none;
+  }
+
+  .pill:active {
+    transform: none;
+  }
+}

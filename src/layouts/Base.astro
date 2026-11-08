@@ -1,0 +1,36 @@
+---
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description: string;
+  email?: string;
+}
+
+const { title, description, email } = Astro.props;
+
+// Roundness pinned at 60 and no optical-size axis: a 45 KB Latin file instead of 204 KB.
+const FONTS =
+  'https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght,ROND@400..700,60&family=IBM+Plex+Mono:wght@500&display=swap';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href={FONTS} />
+  </head>
+  <body>
+    <a class="skip pill" href="#main">Skip to content</a>
+    <Header hasContact={Boolean(email)} />
+    <main id="main"><slot /></main>
+    <Footer email={email} />
+  </body>
+</html>
