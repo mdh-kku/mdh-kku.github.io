@@ -1,0 +1,11 @@
+# Private working files: they contain names of people who have not consented yet
+old work/
+.superpowers/
+content-notes.md
+docs/superpowers/
+
+# Build output and dependencies
+node_modules/
+dist/
+dist-fixtures/
+.astro/
