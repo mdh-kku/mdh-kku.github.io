@@ -4,7 +4,7 @@ import Hero from '../components/Hero.astro';
 import ResearchAreas from '../components/ResearchAreas.astro';
 import PublicationsFinder from '../components/PublicationsFinder.astro';
 import Latest from '../components/Latest.astro';
-import InProgress from '../components/InProgress.astro';
+import People from '../components/People.astro';
 import WorkWithUs from '../components/WorkWithUs.astro';
 import About from '../components/About.astro';
 import { loadSite } from '../lib/content';
@@ -23,8 +23,8 @@ const areasShown = showSection(visibleAreas(site.areas, site.projects, site.publ
   <Hero photos={site.hero} hasContact={Boolean(site.email)} researchHref={areasShown ? '#research' : '/research/'} />
   <ResearchAreas areas={site.areas} projects={site.projects} publications={site.publications} />
   <PublicationsFinder publications={site.publications} areas={site.areas} />
+  <People people={site.people} advisors={site.advisors} />
   <Latest updates={site.updates} />
-  <InProgress people={site.people} />
   {site.email && <WorkWithUs email={site.email} />}
   <About count={site.people.length} />
 </Base>

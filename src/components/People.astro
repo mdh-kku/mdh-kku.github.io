@@ -1,0 +1,56 @@
+---
+import SectionHeading from './SectionHeading.astro';
+import PersonTile from './PersonTile.astro';
+import type { AdvisorView, PersonView } from '../lib/content';
+import { peopleCards, peopleLinkCss, showSection } from '../lib/site';
+
+interface Props {
+  people: PersonView[];
+  advisors: AdvisorView[];
+}
+
+const { people, advisors } = Astro.props;
+const cards = peopleCards(people, advisors);
+---
+
+{
+  showSection(people.length) && (
+    <section class="container people" id="people">
+      <div class="head">
+        <SectionHeading title="People" />
+        <a class="pill pill--out" href="/people/">All people →</a>
+      </div>
+      <ul class="people-grid">
+        {cards.map((c, i) => (
+          <li>
+            <PersonTile card={c} level={3} index={i} href={`/people/#${c.anchor}`} />
+          </li>
+        ))}
+      </ul>
+      <style is:inline set:html={peopleLinkCss(cards, '.people-grid')} />
+    </section>
+  )
+}
+
+<style>
+  .people {
+    padding-block: 88px 24px;
+  }
+
+  .head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px 24px;
+  }
+
+  .people-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(330px, 100%), 1fr));
+    gap: 8px;
+    margin: 28px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+</style>

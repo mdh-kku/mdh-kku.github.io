@@ -42,18 +42,49 @@ describe('layout', () => {
 
 describe('people page', () => {
   const h = () => built('people/index.html');
-  it('lists every student with an anchor', () => {
-    for (const id of ['ann-a', 'ben-b', 'cara-c', 'dee-d']) expect(h()).toContain(`id="${id}"`);
+  const css = () => [...h().matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)].map((m) => m[1]).join('\n') + builtCss();
+  it('gives everyone an anchor and an h2 name', () => {
+    for (const id of ['ann-a', 'ben-b', 'cara-c', 'dee-d', 'pi-adv-one', 'pi-adv-two']) expect(h()).toContain(`id="${id}"`);
+    expect(h()).toMatch(/<h2[^>]*>Ann Alpha<\/h2>/);
   });
-  it('shows the role and field labels', () => {
-    for (const t of ['MD/MSc student', 'Research interest', 'Thesis topic', '>Advisors<']) expect(h()).toContain(t);
+  it('shows Thai names, roles and who works with whom', () => {
+    expect(h()).toContain('แอน');
+    expect(h()).toContain('Principal investigator');
+    expect(h()).toContain('Advises:');
+    expect(h()).not.toContain('Supervises:');
   });
-  it('shows Thai names', () => expect(h()).toContain('แอน'));
-  it('links students to advisors and lists who each supervises', () => {
-    expect(h()).toContain('href="#advisor-adv-one"');
-    expect(h()).toMatch(/Supervises:[^<]*Ann Alpha/);
-  });
+  it("links Ann's ORCID", () => expect(h()).toContain('href="https://orcid.org/0000-0000-0000-0001"'));
   it('gives every image a non-empty alt', () => expect(h()).not.toMatch(/<img(?![^>]*\balt="[^"]+")[^>]*>/));
+  it('reflows at 320px: the grid never demands more than the screen width (WCAG 1.4.10)', () =>
+    expect(css().replace(/\s/g, '')).toContain('minmax(min(330px,100%),1fr)'));
+  it('marks the person you arrived at with a fading tint', () => expect(css()).toMatch(/:target[^{]*\{[^}]*animation:[^;}]*arrive/));
+});
+
+describe('home: people', () => {
+  const h = () => built('index.html');
+  const section = () => h().match(/<section[^>]*id="people"[\s\S]*?<\/section>/)?.[0] ?? '';
+  const tiles = () => [...section().matchAll(/<a[^>]*class="[^"]*\btile\b[^"]*"[^>]*>[\s\S]*?<\/a>/g)].map((m) => m[0]);
+  it('shows students and principal investigators as equals, A to Z', () => {
+    expect(tiles().map((t) => t.match(/<h3[^>]*>([^<]*)<\/h3>/)?.[1])).toEqual([
+      'Ann Alpha', 'Ben Beta', 'Cara Gamma', 'Dee Deeprasertsuwannakulsombat', 'Rex Mentor, PhD', 'Tess Advisor, MD',
+    ]);
+    expect(section().match(/>Student</g)).toHaveLength(4);
+    expect(section().match(/>Principal investigator</g)).toHaveLength(2);
+  });
+  it('says who works with whom', () => {
+    expect(tiles().find((t) => t.includes('Cara Gamma'))).toContain('data-links="pi-adv-one pi-adv-two"');
+    expect(section()).toContain('Advises: Ann Alpha · Cara Gamma · Dee Deeprasertsuwannakulsombat');
+  });
+  it('links each tile to that person on the People page', () => {
+    expect(section()).toContain('href="/people/#ann-a"');
+    expect(section()).toContain('href="/people/#pi-adv-one"');
+  });
+  it('lights up the people a tile works with in CSS, no script', () =>
+    expect(h()).toContain(':has([data-key="cara-c"]:hover)'));
+  it('no longer has In progress', () => {
+    expect(h()).not.toContain('In progress');
+    expect(h()).not.toContain('theses underway');
+  });
 });
 
 describe('home: hero, latest', () => {
@@ -72,15 +103,10 @@ describe('home: hero, latest', () => {
   });
 });
 
-describe('home: in progress, work with us, about', () => {
+describe('home: work with us, about', () => {
   const h = () => built('index.html');
   it('makes [hidden] win over pill styles', () =>
     expect(builtCss().replace(/\s/g, '')).toContain('[hidden]{display:none!important}'));
-  it('reflows at 320px: grids never demand more than the screen width (WCAG 1.4.10)', () => {
-    expect(built('people/index.html')).toContain('minmax(min(280px,100%),1fr)');
-    expect(builtCss()).toContain('minmax(min(260px,100%),1fr)');
-  });
-  it('counts theses', () => expect(h()).toContain('Four theses underway.'));
   it('builds both mailto links', () => {
     expect(h()).toContain('mailto:lab@example.org?subject=Collaboration%20with%20MDH%20Lab');
     expect(h()).toContain('mailto:lab@example.org?subject=Funding%20for%20MDH%20Lab');
@@ -89,7 +115,7 @@ describe('home: in progress, work with us, about', () => {
     expect(h()).toContain('Four medical students earning an MSc in Data Science and Health Informatics alongside the MD'));
   it('keeps the approved section order', () => {
     const s = h();
-    const at = ['research', 'publications', 'latest', 'in-progress', 'work-with-us', 'about'].map(id => s.indexOf(`id="${id}"`));
+    const at = ['research', 'publications', 'people', 'latest', 'work-with-us', 'about'].map(id => s.indexOf(`id="${id}"`));
     expect(at.every((p, i) => p > -1 && (i === 0 || p > at[i - 1]))).toBe(true);
   });
 });
@@ -277,8 +303,6 @@ describe('sharing and hygiene', () => {
     expect(built('404.html')).toContain('Page not found');
     expect(built('404.html')).toContain('It may have moved.');
   });
-  it('keeps heading order on People: an h2 before the student names', () =>
-    expect(built('people/index.html')).toMatch(/<h2[^>]*class="sr-only"[^>]*>Students<\/h2>/));
   it('has a 1200×630 share image', async () => {
     const sharp = (await import('sharp')).default;
     const m = await sharp('public/og.png').metadata();

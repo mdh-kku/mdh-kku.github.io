@@ -23,10 +23,6 @@ export function numberWord(n: number): string {
   return WORDS[n - 1] ?? String(n);
 }
 
-export function thesesHeadline(n: number): string {
-  return `${cap(numberWord(n))} ${n === 1 ? 'thesis' : 'theses'} underway.`;
-}
-
 export function aboutLead(n: number): string {
   // Before anyone is added there is no number to show, never "0 medical students".
   const who = n < 1 ? 'Medical students' : `${cap(numberWord(n))} medical ${n === 1 ? 'student' : 'students'}`;
@@ -163,6 +159,109 @@ export function peopleOnPublications(pubs: { people: { key: string; name: string
     byKey.set(p.key, { key: p.key, name: p.name, count: (byKey.get(p.key)?.count ?? 0) + 1 });
   }
   return [...byKey.values()].sort((a, b) => a.name.localeCompare(b.name));
+}
+
+type Img = import('astro').ImageMetadata;
+
+/** One card in the People grid: a student or a principal investigator, shown as equals. */
+export type PersonCardData = {
+  key: string;
+  anchor: string;
+  kind: 'student' | 'pi';
+  name: string;
+  role: 'Student' | 'Principal investigator';
+  /** A student's thesis topic; a principal investigator's department · research interest. */
+  line: string;
+  /** "Advisor: …" on a student, "Advises: …" on a principal investigator; empty when there is no one. */
+  relation: string;
+  /** Keys of the cards to light up alongside this one. */
+  linked: string[];
+  initials: string;
+  photo?: Img;
+  photoAlt?: string;
+  nameTh?: string;
+  title?: string;
+  researchInterest?: string;
+  links?: { label: string; href: string }[];
+};
+
+const initialsOf = (name: string) =>
+  name
+    .split(',')[0]
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((w) => w[0])
+    .join('')
+    .toUpperCase();
+
+const STUDENT_LINKS = [
+  ['orcid', 'ORCID'],
+  ['scholar', 'Google Scholar'],
+  ['github', 'GitHub'],
+  ['linkedin', 'LinkedIn'],
+  ['email', 'Email'],
+] as const;
+
+/** Students and principal investigators in one A-to-Z list. Who works with whom is derived, never typed. */
+export function peopleCards(
+  people: import('./content').PersonView[],
+  advisors: import('./content').AdvisorView[],
+): PersonCardData[] {
+  const nameOf = new Map(advisors.map((a) => [a.id, a.name]));
+  const students = people.map(
+    (p): PersonCardData => ({
+      key: p.id,
+      anchor: p.id,
+      kind: 'student',
+      name: p.name,
+      role: 'Student',
+      line: p.thesisTopic,
+      relation: `${p.advisors.length === 1 ? 'Advisor' : 'Advisors'}: ${p.advisors.map((a) => nameOf.get(a.id) ?? a.label).join(' · ')}`,
+      linked: p.advisors.map((a) => `pi-${a.id}`),
+      initials: initialsOf(p.name),
+      photo: p.photo,
+      photoAlt: p.photoAlt,
+      nameTh: p.nameTh,
+      researchInterest: p.researchInterest,
+      links: STUDENT_LINKS.filter(([k]) => p.links[k]).map(([k, label]) => ({
+        label,
+        href: k === 'email' ? `mailto:${p.links.email}` : p.links[k]!,
+      })),
+    }),
+  );
+  const pis = advisors.map(
+    (a): PersonCardData => ({
+      key: `pi-${a.id}`,
+      anchor: `pi-${a.id}`,
+      kind: 'pi',
+      name: a.name,
+      role: 'Principal investigator',
+      line: `${a.department} · ${a.researchInterest}`,
+      relation: a.supervises.length > 0 ? `Advises: ${a.supervises.map((s) => s.name).join(' · ')}` : '',
+      linked: a.supervises.map((s) => s.id),
+      initials: initialsOf(a.name),
+      photo: a.photo,
+      photoAlt: a.photoAlt,
+      title: a.title,
+      links: [
+        ...(a.orcid ? [{ label: 'ORCID', href: a.orcid }] : []),
+        ...(a.profileUrl ? [{ label: 'Profile', href: a.profileUrl }] : []),
+      ],
+    }),
+  );
+  return [...students, ...pis].sort((x, y) => x.name.localeCompare(y.name));
+}
+
+/** CSS that lights up the people a card works with while it is hovered (mouse only) or holds focus. No script. */
+export function peopleLinkCss(cards: { key: string; linked: string[] }[], scope: string): string {
+  const lit = 'background:#eaf1ff;box-shadow:inset 0 0 0 1.5px rgba(47,95,208,.35)';
+  const rules = (state: string) =>
+    cards
+      .filter((c) => c.linked.length > 0)
+      .map((c) => `${scope}:has([data-key="${c.key}"]${state}) :is(${c.linked.map((k) => `[data-key="${k}"]`).join(',')}){${lit}}`)
+      .join('');
+  return `@media (hover:hover) and (pointer:fine){${rules(':hover')}}${rules(':focus-within')}`;
 }
 
 /** One filter pill per area, counting the items listed under it, then "Other" for items in no area. */

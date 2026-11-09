@@ -1,0 +1,191 @@
+---
+import { Image } from 'astro:assets';
+import type { PersonCardData } from '../lib/site';
+
+interface Props {
+  card: PersonCardData;
+  /** The name's heading level: 3 under the homepage's "People" h2, 2 under the People page's h1. */
+  level: 2 | 3;
+  /** Place in the A-to-Z list: picks the portrait shape. */
+  index: number;
+  /** The People page adds the Thai name, title, research interest and links. */
+  expanded?: boolean;
+  /** On the homepage the whole tile links to that person on the People page. */
+  href?: string;
+}
+
+const { card: c, level, index, expanded = false, href } = Astro.props;
+const SHAPES = ['shape-circle', 'shape-arch', 'shape-pill', 'shape-square'];
+const Name = level === 2 ? 'h2' : 'h3';
+const Root = href ? 'a' : 'article';
+---
+
+<Root
+  class:list={['tile', 'bw', { expanded, linked: href }]}
+  href={href}
+  id={expanded ? c.anchor : undefined}
+  data-key={c.key}
+  data-links={c.linked.join(' ')}
+>
+  <div class:list={['ph', SHAPES[index % SHAPES.length]]}>
+    {c.photo ? <Image src={c.photo} alt={c.photoAlt!} width={168} /> : <span aria-hidden="true">{c.initials}</span>}
+  </div>
+  <div class="pt">
+    <p class="label role">{c.role}</p>
+    <Name>{c.name}</Name>
+    {expanded && c.nameTh && <p class="th" lang="th">{c.nameTh}</p>}
+    {expanded && c.title && <p class="rel">{c.title}</p>}
+    <p class="line">{c.line}</p>
+    {expanded && c.researchInterest && <p class="interest"><span class="label">Research interest</span> {c.researchInterest}</p>}
+    {c.relation && <p class="rel">{c.relation}</p>}
+    {expanded && c.links && c.links.length > 0 && <p class="links">{c.links.map((l) => <a href={l.href}>{l.label}</a>)}</p>}
+  </div>
+</Root>
+
+<style>
+  .tile {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    height: 100%;
+    padding: 14px;
+    border-radius: 22px;
+    color: var(--ink);
+    text-decoration: none;
+    scroll-margin-top: 24px;
+    transition:
+      background-color 150ms ease,
+      box-shadow 150ms ease,
+      translate 200ms var(--ease-out),
+      scale 160ms var(--ease-out);
+  }
+
+  .expanded {
+    padding: 18px;
+    background: var(--band);
+  }
+
+  /* Arriving from the homepage: the person you picked carries the "linked" tint for a moment, then it fades. */
+  .tile:target {
+    animation: arrive 1.6s ease;
+  }
+
+  @keyframes arrive {
+    0%,
+    35% {
+      background-color: #eaf1ff;
+      box-shadow: inset 0 0 0 1.5px rgba(47, 95, 208, 0.35);
+    }
+  }
+
+  .linked:active {
+    scale: 0.98;
+  }
+
+  /* Portraits in the site's shapes; initials on light grey until there is a photo. */
+  .ph {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 84px;
+    height: 84px;
+    overflow: hidden;
+    background: #e9edf3;
+    color: var(--ink-2);
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+
+  .ph :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .shape-circle {
+    border-radius: 50%;
+  }
+
+  .shape-arch {
+    border-radius: 42px 42px 14px 14px;
+  }
+
+  .shape-pill {
+    width: 64px;
+    border-radius: 999px;
+  }
+
+  .shape-square {
+    border-radius: 20px;
+  }
+
+  .pt {
+    display: grid;
+    gap: 3px;
+    min-width: 0;
+  }
+
+  h2,
+  h3 {
+    font-size: 17px;
+    font-weight: 650;
+    letter-spacing: -0.01em;
+    line-height: 1.25;
+  }
+
+  .role,
+  .rel {
+    color: var(--grey);
+  }
+
+  .line,
+  .interest {
+    font-size: 14.5px;
+    line-height: 1.4;
+  }
+
+  .interest {
+    margin-top: 4px;
+    color: var(--ink-2);
+  }
+
+  .rel {
+    font-size: 13.5px;
+  }
+
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 14px;
+    margin-top: 6px;
+    font-size: 14px;
+  }
+
+  .links a {
+    color: var(--ink);
+    text-underline-offset: 3px;
+  }
+
+  /* Only tiles that go somewhere lift. */
+  @media (hover: hover) and (pointer: fine) {
+    .linked:hover {
+      background: var(--band);
+      translate: 0 -2px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tile {
+      transition:
+        background-color 150ms ease,
+        box-shadow 150ms ease;
+    }
+
+    .linked:hover,
+    .linked:active {
+      translate: none;
+      scale: none;
+    }
+  }
+</style>

@@ -1,46 +1,35 @@
 ---
 import Base from '../layouts/Base.astro';
 import SectionHeading from '../components/SectionHeading.astro';
-import PersonCard from '../components/PersonCard.astro';
-import AdvisorCard from '../components/AdvisorCard.astro';
+import PersonTile from '../components/PersonTile.astro';
 import { loadSite } from '../lib/content';
-import { showSection } from '../lib/site';
+import { peopleCards, peopleLinkCss, showSection } from '../lib/site';
 
 const site = await loadSite();
+// Same launch rule as before: students show once there are at least 3; principal investigators from the first.
+const cards = peopleCards(showSection(site.people.length) ? site.people : [], site.advisors);
 ---
 
 <Base
   title="People · MDH Lab"
-  description="Students and advisors of MDH Lab, Faculty of Medicine, Khon Kaen University."
+  description="Students and principal investigators of MDH Lab, Faculty of Medicine, Khon Kaen University."
   email={site.email}
   facebook={site.facebook}
 >
   <div class="container page">
     <SectionHeading level={1} title="People" />
-
     {
-      showSection(site.people.length) && (
-        <section class="students" aria-labelledby="students-heading">
-          <h2 class="sr-only" id="students-heading">Students</h2>
-          {site.people.map((p) => (
-            <PersonCard person={p} />
+      cards.length > 0 && (
+        <ul class="people-grid">
+          {cards.map((c, i) => (
+            <li>
+              <PersonTile card={c} level={2} index={i} expanded />
+            </li>
           ))}
-        </section>
+        </ul>
       )
     }
-
-    {
-      site.advisors.length > 0 && (
-        <section class="advisors" aria-labelledby="advisors-heading">
-          <SectionHeading title="Advisors" id="advisors-heading" />
-          <div class="grid">
-            {site.advisors.map((a) => (
-              <AdvisorCard advisor={a} />
-            ))}
-          </div>
-        </section>
-      )
-    }
+    <style is:inline set:html={peopleLinkCss(cards, '.people-grid')} />
   </div>
 </Base>
 
@@ -49,18 +38,12 @@ const site = await loadSite();
     padding-block: 56px 96px;
   }
 
-  .students {
-    margin-top: 40px;
-  }
-
-  .advisors {
-    margin-top: 72px;
-  }
-
-  .grid {
+  .people-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
-    gap: 16px;
-    margin-top: 28px;
+    grid-template-columns: repeat(auto-fill, minmax(min(330px, 100%), 1fr));
+    gap: 12px;
+    margin: 32px 0 0;
+    padding: 0;
+    list-style: none;
   }
 </style>
