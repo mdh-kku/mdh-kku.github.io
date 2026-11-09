@@ -1,0 +1,155 @@
+---
+import type { PublicationView } from '../lib/content';
+import { coauthors, isPaper, publicationButtons, typeLabel } from '../lib/site';
+
+interface Props {
+  pub: PublicationView;
+  areaNames: Record<string, string>;
+  level: 3 | 4;
+  hidden?: boolean;
+  /** "Recent" on the homepage skips datasets and preprints; defaults to the work's own type. */
+  paper?: boolean;
+}
+
+const { pub, areaNames, level, hidden = false, paper = isPaper(pub.type) } = Astro.props;
+const Title = level === 3 ? 'h3' : 'h4';
+const others = coauthors(pub);
+const type = typeLabel(pub.type);
+---
+
+<li
+  class="pubrow"
+  data-areas={pub.areas.join(' ')}
+  data-year={pub.year}
+  data-people={pub.people.map((p) => p.key).join(' ')}
+  data-paper={String(paper)}
+  hidden={hidden}
+>
+  <div>
+    <Title>{pub.title}</Title>
+    {/* One line each: line breaks in the source would land in the page as stray spaces. */}
+    <p class="who">{pub.people.map((p, i) => <>{i > 0 && ' · '}<b>{p.name}</b></>)}{others > 0 && ` and ${others} co-author${others === 1 ? '' : 's'}`}</p>
+    <p class="meta"><i class="venue">{pub.venue ?? 'Venue not listed'}</i> · {pub.year}{type && ` · ${type}`}{pub.openAccess && ' · Open access'}{pub.areas.map((a) => <> · <span class="area">{areaNames[a]}</span></>)}</p>
+  </div>
+  <div class="links">
+    {
+      publicationButtons(pub).map((b) => (
+        <a class:list={['lk', { 'lk--pdf': b.label === 'PDF' }]} href={b.href} title={b.title} target="_blank" rel="noopener">{b.label}</a>
+      ))
+    }
+  </div>
+</li>
+
+<style>
+  .pubrow {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 4px 28px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  h3,
+  h4 {
+    max-width: 80ch;
+    margin: 0;
+    font-size: 17px;
+    font-weight: 600;
+    line-height: 1.38;
+    letter-spacing: -0.01em;
+  }
+
+  .who {
+    margin-top: 4px;
+    font-size: 14.5px;
+    color: var(--ink-2);
+  }
+
+  .who b {
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .meta {
+    margin-top: 2px;
+    font-size: 13.5px;
+    color: var(--grey);
+  }
+
+  .area {
+    font: 500 11px/1 var(--mono);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .links {
+    display: flex;
+    align-self: start;
+    gap: 6px;
+  }
+
+  .lk {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    height: 32px;
+    padding: 0 12px;
+    border-radius: 999px;
+    box-shadow: inset 0 0 0 1px rgba(18, 19, 23, 0.16);
+    color: var(--ink);
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    text-decoration: none;
+    transition:
+      background-color 150ms ease,
+      transform 160ms var(--ease-out);
+  }
+
+  /* The pill looks 32px tall but takes taps over 40px. */
+  .lk::before {
+    content: '';
+    position: absolute;
+    inset: -4px 0;
+  }
+
+  .lk:active {
+    transform: scale(0.97);
+  }
+
+  .lk--pdf {
+    background: var(--ink);
+    color: var(--white);
+    box-shadow: none;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .lk:hover {
+      background: var(--band);
+    }
+
+    .lk--pdf:hover {
+      background: #2b2d34;
+    }
+  }
+
+  @media (max-width: 760px) {
+    .pubrow {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .links {
+      margin-top: 6px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lk {
+      transition: background-color 150ms ease;
+    }
+
+    .lk:active {
+      transform: none;
+    }
+  }
+</style>

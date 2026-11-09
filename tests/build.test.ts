@@ -21,8 +21,11 @@ describe('layout', () => {
     expect(h()).toMatch(/<main[^>]*id="main"/);
   });
   it('has the header links', () => {
-    for (const t of ['>Projects<', '>People<', '>Latest<']) expect(h()).toContain(t);
-    expect(h()).toContain('href="/people/"');
+    const header = h().match(/<header[\s\S]*?<\/header>/)?.[0] ?? '';
+    expect(header).toMatch(/<a href="\/research\/"[^>]*>Research &amp; publications<\/a>/);
+    expect(header).toMatch(/<a href="\/people\/"[^>]*>People<\/a>/);
+    expect(header).toMatch(/<a href="\/#latest"[^>]*>Latest<\/a>/);
+    expect(header).not.toContain('>Projects<');
   });
   it('names the institution in the footer', () =>
     expect(h()).toContain('MDH Lab · Laboratory for Medicine, Data &amp; Health · Faculty of Medicine, Khon Kaen University, Khon Kaen, Thailand'));
@@ -123,16 +126,89 @@ describe('the new look', () => {
     expect(builtCss().replace(/\s/g, '')).toContain('@view-transition{navigation:auto}'));
 });
 
+describe('research page', () => {
+  const r = () => built('research/index.html');
+  const rows = () => r().split('<li class="pubrow"').slice(1).map((s) => s.split('</li>')[0]);
+  const rowOf = (title: string) => rows().find((s) => s.includes(title)) ?? '';
+  const links = (title: string) => [...rowOf(title).matchAll(/<a[^>]*>([^<]+)<\/a>/g)].map((m) => m[1]);
+  const options = (name: string) => {
+    const select = r().match(new RegExp(`<select[^>]*name="${name}"[\\s\\S]*?</select>`))?.[0] ?? '';
+    return [...select.matchAll(/<option[^>]*>([^<]*)<\/option>/g)].map((m) => m[1]);
+  };
+  const css = () => [...r().matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)].map((m) => m[1]).join('\n') + builtCss();
+
+  it('has its title, heading and lede', () => {
+    expect(r()).toContain('<title>Research &amp; publications · MDH Lab</title>');
+    expect(r()).toMatch(/<h1[^>]*>The work behind MDH Lab<\/h1>/);
+    expect(r()).toContain('Projects our students are building now, and every paper our principal investigators have published. Filter by research area, year or person.');
+  });
+  it('offers the people on the publications, A to Z, with counts', () =>
+    expect(options('person')).toEqual(['Everyone', 'Rex Mentor, PhD (5)', 'Tess Advisor, MD (4)']));
+  it('is a GET form with area radios, year, person and search', () => {
+    expect(r()).toMatch(/<form[^>]*method="get"[^>]*data-finder/);
+    expect(r()).toMatch(/<select[^>]*name="year"/);
+    expect(r()).toMatch(/<input[^>]*type="search"[^>]*name="q"/);
+    const radios = [...r().matchAll(/<input[^>]*type="radio"[^>]*name="area"[^>]*value="([^"]*)"/g)].map((m) => m[1]);
+    expect(radios).toEqual(['all', 'rehab-fx', 'imaging-fx', 'data-fx', 'papers-fx', 'other']);
+  });
+  it('counts projects and publications under each area pill', () => {
+    const pills = [...r().matchAll(/<span[^>]*>([^<]+)<i[^>]*>(\d+)<\/i><\/span>/g)].map((m) => `${m[1]} ${m[2]}`);
+    expect(pills).toEqual(['All 11', 'Rehabilitation 2', 'Imaging 3', 'Health data 5', 'Papers only 1', 'Other 1']);
+  });
+  it('lists every shown work, grouped by year, newest first', () => {
+    expect(rows()).toHaveLength(8);
+    expect(r()).not.toContain('Fake preprint seven');
+    expect([...r().matchAll(/data-year-group="(\d+)"/g)].map((m) => m[1])).toEqual(['2026', '2025', '2023', '2021', '2020']);
+  });
+  it('gives each row the right buttons, never two to one place', () => {
+    expect(links('Fake paper one')).toEqual(['PDF', 'DOI']);
+    expect(rowOf('Fake paper two')).toMatch(/<a[^>]*href="https:\/\/example\.org\/pmc\/w2"[^>]*title="Free copy at PubMed Central"[^>]*>Free copy<\/a>/);
+    expect(links('Fake paper three')).toEqual(['DOI']);
+    expect(links('Fake review six')).toEqual(['Link']);
+    expect(rowOf('Fake review six')).toContain('href="https://example.org/w6"');
+    expect(rowOf('งานวิจัยปลอมแปด')).toContain('href="https://openalex.org/W8"');
+  });
+  it('names lab people in bold and only counts co-authors', () => {
+    expect(rowOf('Fake paper one')).toMatch(/<b[^>]*>Tess Advisor, MD<\/b> and 4 co-authors/);
+    const four = rowOf('Fake paper four');
+    expect(four).toMatch(/<b[^>]*>Tess Advisor, MD<\/b> · <b[^>]*>Rex Mentor, PhD<\/b>/);
+    expect(four).not.toContain('co-author');
+    expect(four).toMatch(/^[^>]*data-areas="data-fx"/);
+  });
+  it('escapes titles and keeps Thai', () => {
+    expect(r()).toContain('Fake paper one about &lt;i&gt;voice&lt;/i&gt; games');
+    expect(r()).toContain('งานวิจัยปลอมแปด');
+  });
+  it('lists projects in progress: featured first, then newest', () => {
+    const at = ['>Alpha<', '>Beta<', '>Gamma<'].map((t) => r().indexOf(t));
+    expect(at.every((p, i) => p > -1 && (i === 0 || p > at[i - 1]))).toBe(true);
+  });
+  it('shows next stage, awards, team and one Learn more on project cards', () => {
+    for (const t of ['Next: clinical stage', 'Update 2025-12-03', 'Ann Alpha with Zed Outside']) expect(r()).toContain(t);
+    expect(r()).toMatch(/Learn more<span class="sr-only"[^>]*> about Alpha<\/span>/);
+    expect(r().match(/>\s*Learn more/g)).toHaveLength(1);
+    expect(built('people/index.html')).not.toContain('Zed Outside');
+  });
+  it('ships both empty states hidden', () => {
+    expect(r()).toMatch(/<p[^>]*hidden[^>]*>Nothing matches these filters\.<\/p>/);
+    expect(r()).toMatch(/<p[^>]*hidden[^>]*>No papers in this area yet\. Its work so far is the project above\.<\/p>/);
+  });
+  it('gives every image a non-empty alt', () => expect(r()).not.toMatch(/<img(?![^>]*\balt="[^"]+")[^>]*>/));
+  it('makes the pinned filter bar solid when people ask for less transparency', () =>
+    expect(css()).toContain('prefers-reduced-transparency'));
+});
+
 describe('sharing and hygiene', () => {
   it('has share tags with an absolute image URL', () => {
     const s = built('index.html');
     expect(s).toMatch(/<meta property="og:image" content="https:\/\/[^"]+\/og\.png"/);
     expect(s).toContain('summary_large_image');
   });
-  it('lists both pages in the sitemap', () => {
+  it('lists every page in the sitemap', () => {
     const x = built('sitemap.xml');
-    expect(x.match(/<loc>/g)).toHaveLength(2);
+    expect(x.match(/<loc>/g)).toHaveLength(3);
     expect(x).toContain('/people/');
+    expect(x).toContain('/research/');
   });
   it('has a 404 page', () => {
     expect(built('404.html')).toContain('Page not found');
@@ -150,7 +226,7 @@ describe('sharing and hygiene', () => {
   it('has no placeholder words in src/', () => {
     const walk = (d: string): string[] => readdirSync(d).flatMap(f => statSync(join(d, f)).isDirectory() ? walk(join(d, f)) : [join(d, f)]);
     const hits = walk('src').filter(f => /\.(astro|ts|css|md|json)$/.test(f))
-      .filter(f => /\b(lorem|todo|placeholder|tbd)\b/i.test(readFileSync(f, 'utf8')));
+      .filter(f => /\b(lorem|todo|tbd)\b|\bplaceholder\b(?!=)/i.test(readFileSync(f, 'utf8')));
     expect(hits).toEqual([]);
   });
 });

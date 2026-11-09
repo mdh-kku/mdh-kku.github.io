@@ -1,0 +1,207 @@
+---
+interface Props {
+  action: string;
+  variant: 'page' | 'home';
+  /** Every area plus `other`; pills with a count of 0 are left out. */
+  areas: { id: string; name: string; count: number }[];
+  years: number[];
+  people: { key: string; name: string; count: number }[];
+  /** Works (publications) in the list: the "N of M works" count and "See all N". */
+  total: number;
+  /** Everything listed under "All"; on the full page that includes the projects. */
+  allCount?: number;
+}
+
+const { action, variant, areas, years, people, total, allCount = total } = Astro.props;
+---
+
+{/* A plain GET form: without JavaScript it still opens the research page filtered. With it, the list filters live. */}
+<form class="finder" action={action} method="get" role="search" data-finder>
+  <fieldset class="pick">
+    <legend class="sr-only">Research area</legend>
+    <label><input type="radio" name="area" value="all" checked /><span>All<i>{allCount}</i></span></label>
+    {
+      areas
+        .filter((a) => a.count > 0)
+        .map((a) => (
+          <label><input type="radio" name="area" value={a.id} /><span>{a.name}<i>{a.count}</i></span></label>
+        ))
+    }
+  </fieldset>
+  <div class="row">
+    <label class="sr-only" for="f-year">Year</label>
+    <select id="f-year" name="year">
+      <option value="all">All years</option>
+      {years.map((y) => <option value={y}>{y}</option>)}
+    </select>
+    <label class="sr-only" for="f-person">Person</label>
+    <select id="f-person" name="person">
+      <option value="all">Everyone</option>
+      {people.map((p) => <option value={p.key}>{p.name} ({p.count})</option>)}
+    </select>
+    <label class="sr-only" for="f-q">Search titles and journals</label>
+    <input id="f-q" type="search" name="q" placeholder="Search titles and journals" autocomplete="off" />
+    {
+      variant === 'page' ? (
+        <>
+          <button type="button" class="clear" data-clear hidden>Clear filters</button>
+          <p class="label count" aria-live="polite" data-count>{total} of {total} works</p>
+        </>
+      ) : (
+        <button type="submit" class="pill" data-see-all>See all {total}</button>
+      )
+    }
+  </div>
+</form>
+
+<style>
+  .finder {
+    display: grid;
+    gap: 10px;
+  }
+
+  /* Native radios styled as pills, so the filter also works as a plain form. Filtering itself never animates:
+     people refine many times in a row and are reading the result. */
+  .pick {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .pick label {
+    position: relative;
+  }
+
+  .pick input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .pick span {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 40px;
+    padding: 0 15px;
+    border-radius: 999px;
+    background: var(--band);
+    color: var(--ink);
+    font-size: 14.5px;
+    font-weight: 550;
+    cursor: pointer;
+    transition:
+      background-color 150ms ease,
+      color 150ms ease,
+      scale 160ms var(--ease-out);
+  }
+
+  .pick span:active {
+    scale: 0.97;
+  }
+
+  .pick i {
+    font: normal 500 11px/1 var(--mono);
+    color: var(--grey);
+  }
+
+  .pick input:checked + span {
+    background: var(--ink);
+    color: var(--white);
+  }
+
+  .pick input:checked + span i {
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  .pick input:focus-visible + span {
+    outline: 3px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+
+  select,
+  input[type='search'] {
+    height: 40px;
+    padding: 0 16px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--band);
+    color: var(--ink);
+    font: inherit;
+    font-size: 15px;
+  }
+
+  select {
+    padding-right: 36px;
+    appearance: none;
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%2345474d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 8 4 4 4-4'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 16px;
+  }
+
+  input[type='search'] {
+    flex: 1 1 220px;
+    min-width: 0;
+  }
+
+  .clear {
+    height: 40px;
+    padding: 0 12px;
+    border: 0;
+    border-radius: 999px;
+    background: none;
+    color: var(--ink);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+  }
+
+  .count {
+    margin-left: auto;
+    white-space: nowrap;
+  }
+
+  .row .pill {
+    border: 0;
+    cursor: pointer;
+  }
+
+  @media (max-width: 760px) {
+    select {
+      flex: 1 1 140px;
+    }
+
+    .count {
+      width: 100%;
+      margin-left: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pick span {
+      transition:
+        background-color 150ms ease,
+        color 150ms ease;
+    }
+
+    .pick span:active {
+      scale: none;
+    }
+  }
+</style>

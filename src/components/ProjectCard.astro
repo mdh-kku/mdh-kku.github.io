@@ -1,0 +1,166 @@
+---
+import { Image } from 'astro:assets';
+import type { ProjectView } from '../lib/content';
+
+interface Props {
+  project: ProjectView;
+  /** Compact cards sit inside a research-area slide: no team line, image or Learn more. */
+  compact?: boolean;
+}
+
+const { project: p, compact = false } = Astro.props;
+const chips = [p.next, ...p.awards].filter((c): c is string => Boolean(c));
+const members = p.team.map((m) => m.name).join(', ');
+const others = p.contributors.join(', ');
+const team = others ? (members ? `${members} with ${others}` : `With ${others}`) : members;
+---
+
+{
+  compact ? (
+    <div class="card compact">
+      <p class="top">
+        <strong>{p.name}</strong>
+        <span class="label">{p.year}</span>
+      </p>
+      <p class="summary">{p.summary}</p>
+      {chips.length > 0 && <p class="chips">{chips.map((c) => <span class="chip">{c}</span>)}</p>}
+    </div>
+  ) : (
+    <article class:list={['card', 'project-card', 'bw', { linked: p.link }]} data-areas={p.area.id} data-year={p.year} data-people="">
+      {p.image && <Image class="thumb" src={p.image} alt={p.imageAlt!} width={160} />}
+      <div class="top">
+        <h3>{p.name}</h3>
+        <span class="label">{p.year}</span>
+      </div>
+      <p class="summary">{p.summary}</p>
+      {chips.length > 0 && <p class="chips">{chips.map((c) => <span class="chip">{c}</span>)}</p>}
+      {team && <p class="team">{team}</p>}
+      {p.link && <a class="learn" href={p.link}>Learn more<span class="sr-only"> about {p.name}</span></a>}
+    </article>
+  )
+}
+
+<style>
+  .card {
+    position: relative;
+    display: grid;
+    gap: 4px;
+    align-content: start;
+    padding: 16px 18px;
+    border-radius: 18px;
+    background: var(--band);
+    color: var(--ink);
+  }
+
+  .top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  h3,
+  strong {
+    font-size: 18px;
+    font-weight: 650;
+    letter-spacing: -0.01em;
+    line-height: 1.25;
+  }
+
+  .compact {
+    padding: 14px 16px;
+    border-radius: 16px;
+  }
+
+  .compact strong {
+    font-size: 17px;
+  }
+
+  .summary {
+    font-size: 14.5px;
+    line-height: 1.45;
+    color: var(--ink-2);
+  }
+
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 4px;
+  }
+
+  .chip {
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: var(--white);
+    box-shadow: inset 0 0 0 1px rgba(18, 19, 23, 0.1);
+    font: 500 11px/1.4 var(--mono);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+  }
+
+  .team {
+    margin-top: 2px;
+    font-size: 14px;
+    color: var(--ink-2);
+  }
+
+  /* A small thumbnail; cropped with object-fit because <Image> gets a width only. */
+  .card > :global(.thumb) {
+    float: right;
+    width: 64px;
+    height: 64px;
+    margin: 0 0 6px 12px;
+    border-radius: 14px;
+    object-fit: cover;
+  }
+
+  .learn {
+    justify-self: start;
+    margin-top: 6px;
+    color: var(--ink);
+    font-size: 14px;
+    font-weight: 600;
+    text-underline-offset: 3px;
+  }
+
+  /* One link per card, stretched so the whole card opens it. */
+  .learn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 18px;
+  }
+
+  .linked {
+    transition:
+      background-color 150ms ease,
+      translate 200ms var(--ease-out),
+      scale 160ms var(--ease-out);
+  }
+
+  .linked:active {
+    scale: 0.98;
+  }
+
+  /* Only cards that go somewhere lift. */
+  @media (hover: hover) and (pointer: fine) {
+    .linked:hover {
+      background: #eaedf3;
+      translate: 0 -2px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .linked {
+      transition: background-color 150ms ease;
+    }
+
+    .linked:hover,
+    .linked:active {
+      translate: none;
+      scale: none;
+    }
+  }
+</style>

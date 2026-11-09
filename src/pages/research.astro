@@ -1,0 +1,196 @@
+---
+import Base from '../layouts/Base.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+import PublicationFilters from '../components/PublicationFilters.astro';
+import PublicationRow from '../components/PublicationRow.astro';
+import { loadSite } from '../lib/content';
+import { byNewest, orderProjects } from '../lib/site';
+
+const site = await loadSite();
+const pubs = byNewest(site.publications);
+const projects = orderProjects(site.projects, Infinity);
+const areaNames = Object.fromEntries(site.areas.map((a) => [a.id, a.name]));
+
+// A pill counts everything listed under it: the area's projects and its publications.
+const inArea = (id: string) =>
+  projects.filter((p) => p.area.id === id).length + pubs.filter((p) => p.areas.includes(id)).length;
+const areas = [
+  ...site.areas.map((a) => ({ id: a.id, name: a.name, count: inArea(a.id) })),
+  { id: 'other', name: 'Other', count: pubs.filter((p) => p.areas.length === 0).length },
+];
+const years = [...new Set([...pubs.map((p) => p.year), ...projects.map((p) => p.year)])].sort((a, b) => b - a);
+const byPerson = new Map<string, { key: string; name: string; count: number }>();
+for (const p of pubs.flatMap((w) => w.people)) {
+  byPerson.set(p.key, { key: p.key, name: p.name, count: (byPerson.get(p.key)?.count ?? 0) + 1 });
+}
+const people = [...byPerson.values()].sort((a, b) => a.name.localeCompare(b.name));
+const groups = [...new Set(pubs.map((p) => p.year))].map((year) => ({ year, items: pubs.filter((p) => p.year === year) }));
+const works = (n: number) => `${n} ${n === 1 ? 'work' : 'works'}`;
+---
+
+<Base
+  title="Research & publications · MDH Lab"
+  description="Student projects and every paper by MDH Lab's principal investigators, Faculty of Medicine, Khon Kaen University."
+  email={site.email}
+  facebook={site.facebook}
+>
+  <header class="container head">
+    <p class="label">Research &amp; publications</p>
+    <h1 class="headline">The work behind MDH Lab</h1>
+    <p class="lede">Projects our students are building now, and every paper our principal investigators have published. Filter by research area, year or person.</p>
+  </header>
+
+  <div class="bar">
+    <div class="container">
+      <PublicationFilters
+        action="/research/"
+        variant="page"
+        areas={areas}
+        years={years}
+        people={people}
+        total={pubs.length}
+        allCount={pubs.length + projects.length}
+      />
+    </div>
+  </div>
+
+  <div class="container body">
+    {
+      projects.length > 0 && (
+        <section aria-labelledby="projects-h" data-projects>
+          <div class="section-h">
+            <h2 id="projects-h">Projects in progress</h2>
+            <p class="label">By our students</p>
+          </div>
+          <div class="grid">
+            {projects.map((p) => (
+              <ProjectCard project={p} />
+            ))}
+          </div>
+        </section>
+      )
+    }
+
+    <section aria-labelledby="pubs-h">
+      {
+        pubs.length > 0 && (
+          <div class="section-h">
+            <h2 id="pubs-h">What we've published</h2>
+            <p class="label" data-works>
+              {works(pubs.length)}
+            </p>
+          </div>
+        )
+      }
+      <p class="empty" data-empty-papers hidden>No papers in this area yet. Its work so far is the project above.</p>
+      {
+        groups.map((g) => (
+          <section data-year-group={g.year}>
+            <h3 class="year">{g.year}</h3>
+            <ol class="publist">
+              {g.items.map((p) => (
+                <PublicationRow pub={p} areaNames={areaNames} level={4} />
+              ))}
+            </ol>
+          </section>
+        ))
+      }
+      <p class="empty" data-empty hidden>Nothing matches these filters.</p>
+    </section>
+  </div>
+</Base>
+
+<script>
+  import { initFinder } from '../scripts/finder';
+
+  initFinder(document.body, { syncUrl: true });
+</script>
+
+<style>
+  .head {
+    padding-block: 56px 26px;
+  }
+
+  .lede {
+    max-width: 58ch;
+    margin-top: 12px;
+    font-size: 1.0625rem;
+    color: var(--ink-2);
+  }
+
+  /* On desktop the filters stay on screen while the long list scrolls under them: a translucent bar. */
+  .bar {
+    padding: 10px 0 12px;
+  }
+
+  @media (min-width: 761px) {
+    .bar {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      background: rgba(255, 255, 255, 0.84);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      backdrop-filter: blur(20px) saturate(180%);
+      box-shadow: 0 1px 0 var(--line);
+    }
+  }
+
+  /* People who ask for less transparency get a solid bar. */
+  @media (prefers-reduced-transparency: reduce) {
+    .bar {
+      background: var(--white);
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+  }
+
+  .body {
+    padding-bottom: 96px;
+  }
+
+  .section-h {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 12px;
+    margin-top: 34px;
+  }
+
+  h2 {
+    font-size: 24px;
+    font-weight: 650;
+    letter-spacing: -0.02em;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
+    gap: 12px;
+    margin-top: 14px;
+  }
+
+  .year {
+    margin-top: 30px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(18, 19, 23, 0.16);
+    font-size: 26px;
+    font-weight: 650;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .publist {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .empty {
+    margin-top: 18px;
+    padding: 24px;
+    border-radius: 18px;
+    background: var(--band);
+    color: var(--ink-2);
+    text-align: center;
+  }
+</style>
