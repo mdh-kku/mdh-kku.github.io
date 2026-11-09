@@ -43,7 +43,7 @@ describe('people page', () => {
     for (const id of ['ann-a', 'ben-b', 'cara-c', 'dee-d']) expect(h()).toContain(`id="${id}"`);
   });
   it('shows the role and field labels', () => {
-    for (const t of ['MD/MSc student', 'Research interest', 'Thesis topic', 'Advisors.']) expect(h()).toContain(t);
+    for (const t of ['MD/MSc student', 'Research interest', 'Thesis topic', '>Advisors<']) expect(h()).toContain(t);
   });
   it('shows Thai names', () => expect(h()).toContain('แอน'));
   it('links students to advisors and lists who each supervises', () => {
@@ -102,6 +102,27 @@ describe('home: in progress, work with us, about', () => {
   });
 });
 
+describe('the new look', () => {
+  const home = () => built('index.html');
+  it('has no two-tone headings and no black bands', () => {
+    for (const h of [home(), built('people/index.html')]) {
+      expect(h).not.toContain('two-tone');
+      expect(h).not.toMatch(/class="dark|\sdark"/);
+    }
+    expect(builtCss()).not.toContain('.dark');
+  });
+  it('labels Latest and gives it one plain heading', () =>
+    expect(home()).toMatch(/<p class="label">Latest<\/p>\s*<h2 class="headline"[^>]*>Awards and updates<\/h2>/));
+  it('heads Work with us with one plain line', () =>
+    expect(home()).toMatch(/<h2 class="headline"[^>]*>Collaborate, or fund what comes next<\/h2>/));
+  it('links the MSc Facebook page from the footer', () =>
+    expect(home()).toMatch(/<a href="https:\/\/example\.org\/facebook"[^>]*>The MSc on Facebook ↗<\/a>/));
+  it('wraps long words in h4 too (Review Focus 4)', () =>
+    expect(builtCss().replace(/\s/g, '')).toContain('h1,h2,h3,h4,p,li,dd{overflow-wrap:anywhere}'));
+  it('crossfades between pages instead of cutting', () =>
+    expect(builtCss().replace(/\s/g, '')).toContain('@view-transition{navigation:auto}'));
+});
+
 describe('sharing and hygiene', () => {
   it('has share tags with an absolute image URL', () => {
     const s = built('index.html');
@@ -113,7 +134,10 @@ describe('sharing and hygiene', () => {
     expect(x.match(/<loc>/g)).toHaveLength(2);
     expect(x).toContain('/people/');
   });
-  it('has a 404 page', () => expect(built('404.html')).toContain('Page not found.'));
+  it('has a 404 page', () => {
+    expect(built('404.html')).toContain('Page not found');
+    expect(built('404.html')).toContain('It may have moved.');
+  });
   it('names the project inside "Learn more" for screen readers and search engines', () =>
     expect(built('index.html')).toMatch(/Learn more<span class="sr-only"[^>]*> about Alpha<\/span>/));
   it('keeps heading order on People: an h2 before the student names', () =>

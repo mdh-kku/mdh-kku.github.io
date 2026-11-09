@@ -14,7 +14,9 @@ const { people } = Astro.props;
   showSection(people.length) && (
     <section id="in-progress" class="container">
       <div class="head">
-        <SectionHeading lead="In progress." sub={thesesHeadline(people.length)} />
+        <div>
+          <SectionHeading label="In progress" title={thesesHeadline(people.length)} />
+        </div>
         <a class="all" href="/people/">All people</a>
       </div>
       <div class="grid">

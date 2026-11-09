@@ -1,16 +1,24 @@
 ---
 interface Props {
   email?: string;
+  facebook?: string;
 }
 
-const { email } = Astro.props;
+const { email, facebook } = Astro.props;
 const year = new Date().getFullYear();
 ---
 
-<footer class="site-footer dark">
+<footer class="site-footer">
   <div class="container">
     <p>MDH Lab · Laboratory for Medicine, Data &amp; Health · Faculty of Medicine, Khon Kaen University, Khon Kaen, Thailand</p>
-    {email && <a id="contact" href={`mailto:${email}`}>{email}</a>}
+    {
+      (facebook || email) && (
+        <p class="links">
+          {facebook && <a href={facebook} target="_blank" rel="noopener">The MSc on Facebook ↗</a>}
+          {email && <a id="contact" href={`mailto:${email}`}>{email}</a>}
+        </p>
+      )
+    }
     <p>© {year}</p>
   </div>
 </footer>

@@ -7,9 +7,10 @@ interface Props {
   title: string;
   description: string;
   email?: string;
+  facebook?: string;
 }
 
-const { title, description, email } = Astro.props;
+const { title, description, email, facebook } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const shareImage = new URL('/og.png', Astro.site);
 
@@ -42,6 +43,6 @@ const FONTS =
     <a class="skip pill" href="#main">Skip to content</a>
     <Header hasContact={Boolean(email)} />
     <main id="main"><slot /></main>
-    <Footer email={email} />
+    <Footer email={email} facebook={facebook} />
   </body>
 </html>

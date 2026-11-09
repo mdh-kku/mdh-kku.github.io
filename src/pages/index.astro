@@ -15,6 +15,7 @@ const site = await loadSite();
   title="MDH Lab · Laboratory for Medicine, Data & Health"
   description="A lab of medical students earning an MSc in Data Science and Health Informatics at the Faculty of Medicine, Khon Kaen University."
   email={site.email}
+  facebook={site.facebook}
 >
   <Hero photos={site.hero} hasContact={Boolean(site.email)} />
   <Projects projects={site.projects} />

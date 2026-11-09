@@ -3,10 +3,10 @@
 :root {
   --ink: #121317;
   --ink-2: #45474d;
-  --grey: #6b6e76; /* second line of two-tone headings on white (5.1:1) */
-  --grey-on-black: #9a9aa6; /* same, on black (7.4:1) */
-  --black: #000;
+  --grey: #6b6e76; /* quiet text on white (5.1:1) */
   --white: #fff;
+  /* The light band: research areas, footer, finder pills and inputs. */
+  --band: #f3f5f9;
   --sky-1: #eaf3ff;
   --sky-2: #cfe6ff;
   --sky-3: #7cb4ff;
@@ -14,7 +14,6 @@
   --fade-end: #eef5ff;
   --line: rgba(18, 19, 23, 0.18);
   --focus: #0039a6;
-  --focus-on-black: #9fe0ff;
   --radius: 24px;
   --sans: "Google Sans Flex", "Noto Sans Thai", "Leelawadee UI", Thonburi, system-ui, sans-serif;
   --mono: "IBM Plex Mono", ui-monospace, monospace;
@@ -60,6 +59,7 @@ img {
 h1,
 h2,
 h3,
+h4,
 p,
 li,
 dd {
@@ -83,17 +83,15 @@ dd {
   }
 }
 
-/* Two-tone section headings: a statement line and a grey line. */
-.two-tone {
-  font-size: clamp(1.875rem, 3.5vw, 2.625rem);
+/* Section headings: one plain line that says something, under an optional mono label. */
+.headline {
+  max-width: 26ch;
+  margin-top: 10px;
+  font-size: clamp(1.75rem, 1.15rem + 2vw, 2.5rem);
   font-weight: 650;
   letter-spacing: -0.03em;
-  line-height: 1.02;
-}
-
-.two-tone span {
-  display: block;
-  color: var(--grey);
+  line-height: 1.08;
+  text-wrap: balance;
 }
 
 .label {
@@ -129,32 +127,6 @@ dd {
   background: var(--white);
   color: var(--ink);
   box-shadow: inset 0 0 0 1px var(--line);
-}
-
-/* Black bands (Latest, footer). */
-.dark {
-  background: var(--black);
-  color: var(--white);
-}
-
-.dark .two-tone span,
-.dark .label {
-  color: var(--grey-on-black);
-}
-
-.dark :focus-visible {
-  outline-color: var(--focus-on-black);
-}
-
-.dark .pill {
-  background: var(--white);
-  color: var(--black);
-}
-
-.dark .pill--out {
-  background: transparent;
-  color: var(--white);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.28);
 }
 
 /* Photos are black-and-white until hovered (mouse only) or focused. This makes mixed phone photos look like one set. */
@@ -246,9 +218,11 @@ dd {
   }
 }
 
-/* Footer */
+/* Footer: the light band. */
 .site-footer {
   padding-block: 48px;
+  background: var(--band);
+  color: var(--ink-2);
   font-size: 15px;
 }
 
@@ -260,7 +234,25 @@ dd {
 }
 
 .site-footer a {
-  color: var(--white);
+  color: var(--ink);
+}
+
+.site-footer .links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+}
+
+/* Pages crossfade instead of cutting (Chrome, Edge and Safari; other browsers navigate as before).
+   Opacity only, so it stays on with reduced motion. */
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 200ms;
+  animation-timing-function: var(--ease-out);
 }
 
 @media (prefers-reduced-motion: reduce) {

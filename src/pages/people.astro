@@ -13,9 +13,10 @@ const site = await loadSite();
   title="People · MDH Lab"
   description="Students and advisors of MDH Lab, Faculty of Medicine, Khon Kaen University."
   email={site.email}
+  facebook={site.facebook}
 >
   <div class="container page">
-    <SectionHeading level={1} lead="People." sub="Students and advisors." />
+    <SectionHeading level={1} title="People" />
 
     {
       showSection(site.people.length) && (
@@ -31,9 +32,7 @@ const site = await loadSite();
     {
       site.advisors.length > 0 && (
         <section class="advisors" aria-labelledby="advisors-heading">
-          <h2 class="two-tone" id="advisors-heading">
-            Advisors.
-          </h2>
+          <SectionHeading title="Advisors" id="advisors-heading" />
           <div class="grid">
             {site.advisors.map((a) => (
               <AdvisorCard advisor={a} />

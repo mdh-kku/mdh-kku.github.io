@@ -1,4 +1,5 @@
 ---
+import SectionHeading from './SectionHeading.astro';
 import { aboutLead } from '../lib/site';
 
 interface Props {
@@ -9,7 +10,7 @@ const { count } = Astro.props;
 ---
 
 <section id="about" class="container">
-  <h2 class="two-tone">About MDH Lab.</h2>
+  <SectionHeading title="About MDH Lab" />
   <p class="lede">{aboutLead(count)}</p>
   <a class="pill pill--out" href="/people/">Meet the people →</a>
 </section>

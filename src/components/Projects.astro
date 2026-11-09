@@ -21,7 +21,7 @@ const teamLine = (p: ProjectView) => {
 {
   projects.length > 0 && (
     <section id="projects" class="container projects">
-      <SectionHeading lead="Projects." sub="What we've built." />
+      <SectionHeading label="Projects" title="What we've built" />
       <div class="grid">
         {projects.map((p) => (
           <article class:list={['card', 'bw', { linked: p.link }]}>
