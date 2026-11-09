@@ -93,6 +93,18 @@ describe('collaborator', () => {
   it('requires logo_alt when logo is set', () => expect(ok(C, { ...collab, logo: 'logo.png' })).toBe(false));
 });
 
+describe('links', () => {
+  const pub = { title: 'x', year: 2026, type: 'article', open_access: true, authors: 3, advisors: ['adv-one'] };
+  it('rejects links that are not http(s), so imported data cannot ship a script link', () => {
+    expect(ok(publicationSchema(ref), { ...pub, pdf: 'javascript:alert(1)' })).toBe(false);
+    expect(ok(publicationSchema(ref), { ...pub, url: 'data:text/html,x' })).toBe(false);
+    expect(ok(projectSchema(img, ref), { name: 'Alpha', summary: 'x', year: 2024, area: 'a', link: 'javascript:alert(1)' })).toBe(false);
+    expect(ok(siteSchema, { facebook: 'javascript:alert(1)' })).toBe(false);
+  });
+  it('accepts ordinary web addresses', () =>
+    expect(ok(publicationSchema(ref), { ...pub, doi: 'https://doi.org/10.0000/x', pdf: 'http://example.org/x.pdf' })).toBe(true));
+});
+
 describe('site extras', () => {
   const principle = { title: 'Fake principle', line: 'Fake line.' };
   it('rejects a facebook value that is not a URL', () => expect(ok(siteSchema, { facebook: 'nope' })).toBe(false));
