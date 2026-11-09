@@ -3,7 +3,6 @@ import Base from '../layouts/Base.astro';
 import Hero from '../components/Hero.astro';
 import Projects from '../components/Projects.astro';
 import Latest from '../components/Latest.astro';
-import WeWorkOn from '../components/WeWorkOn.astro';
 import InProgress from '../components/InProgress.astro';
 import WorkWithUs from '../components/WorkWithUs.astro';
 import About from '../components/About.astro';
@@ -20,7 +19,6 @@ const site = await loadSite();
   <Hero photos={site.hero} hasContact={Boolean(site.email)} />
   <Projects projects={site.projects} />
   <Latest updates={site.updates} />
-  <WeWorkOn people={site.people} />
   <InProgress people={site.people} />
   {site.email && <WorkWithUs email={site.email} />}
   <About count={site.people.length} />

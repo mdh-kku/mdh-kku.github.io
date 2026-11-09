@@ -3,12 +3,26 @@ import { z } from 'astro/zod';
 /** Astro's image() schema helper (a plain stand-in in tests). */
 type ImageFn = () => z.ZodType;
 /** Astro's reference() schema helper (a plain stand-in in tests). */
-type RefFn = (collection: 'people' | 'advisors' | 'projects') => z.ZodType;
+type RefFn = (collection: 'people' | 'advisors' | 'projects' | 'areas') => z.ZodType;
 
 const text = (min: number, max?: number) => (max ? z.string().min(min).max(max) : z.string().min(min));
 
-/** 3–6 lowercase words, shown in the "We work on:" list. */
-const INDEX_PHRASE = /^[a-z0-9'-]+(?: [a-z0-9'-]+){2,5}$/;
+/** Picture styles for a Research area's generated pattern. */
+export const ART_KINDS = ['wave', 'cells', 'flow', 'scatter', 'rings', 'hexes'] as const;
+export type Art = (typeof ART_KINDS)[number];
+
+/** Match rules feed the publication import, so a pattern that does not compile stops the build here instead. */
+const pattern = z.string().refine(
+  (s) => {
+    try {
+      new RegExp(s, 'i');
+      return true;
+    } catch {
+      return false;
+    }
+  },
+  { message: 'Not a valid pattern' },
+);
 
 /**
  * Dates must be ISO (2025-12-03). YAML turns those into Date objects; a day-first string like 03/12/2025
@@ -30,7 +44,6 @@ export const personSchema = (image: ImageFn, ref: RefFn) =>
       consent: z.literal(true),
       consent_date: isoDate,
       research_interest: text(20, 300),
-      index_phrase: z.string().regex(INDEX_PHRASE, 'Use 3–6 lowercase words'),
       thesis_topic: text(10, 160),
       advisors: z.array(ref('advisors')).min(1),
       links: z
@@ -55,6 +68,9 @@ export const advisorSchema = (image: ImageFn) =>
       photo: image().optional(),
       photo_alt: z.string().optional(),
       profile_url: z.url().optional(),
+      /** OpenAlex author ids, read only by the publication import. */
+      openalex: z.array(z.string().regex(/^A\d+$/, 'An OpenAlex author id looks like A5027417160')).default([]),
+      orcid: z.url().optional(),
       consent: z.literal(true),
     })
     .refine((a) => hasAlt(a.photo, a.photo_alt), { message: 'A photo needs photo_alt', path: ['photo_alt'] });
@@ -65,7 +81,7 @@ export const projectSchema = (image: ImageFn, ref: RefFn) =>
       name: text(1),
       summary: text(1, 120),
       year: z.number().int().min(2000).max(2100),
-      area: text(1),
+      area: ref('areas'),
       image: image().optional(),
       image_alt: z.string().optional(),
       team: z.array(ref('people')).default([]),
@@ -102,6 +118,63 @@ export const heroSchema = (image: ImageFn) =>
     color: z.boolean().default(false),
   });
 
+export const areaSchema = z.object({
+  name: text(1, 40),
+  description: text(10, 140),
+  color: z.string().regex(/^#[0-9a-f]{6}$/i, 'Use a hex colour such as #2f5fd0'),
+  art: z.enum(ART_KINDS),
+  order: z.number().int(),
+  match_topics: pattern.optional(),
+  match_titles: pattern.optional(),
+});
+
+/** One entry of publications.json, written by scripts/import-publications.mjs. The id is the OpenAlex work id. */
+export const publicationSchema = (ref: RefFn) =>
+  z.object({
+    title: text(1),
+    year: z.number().int(),
+    date: isoDate.optional(),
+    type: text(1),
+    venue: z.string().optional(),
+    free_at: z.string().optional(),
+    licence: z.string().optional(),
+    doi: z.url().optional(),
+    pdf: z.url().optional(),
+    free: z.url().optional(),
+    url: z.url().optional(),
+    open_access: z.boolean(),
+    authors: z.number().int().min(1),
+    cited_by: z.number().int().min(0).default(0),
+    advisors: z.array(ref('advisors')).min(1),
+    areas: z.array(ref('areas')).default([]),
+  });
+
+/** Hand corrections applied after the import, so a re-import never undoes them. */
+export const correctionSchema = (ref: RefFn) =>
+  z.object({
+    areas: z.array(ref('areas')).optional(),
+    hidden: z.boolean().default(false),
+  });
+
+export const collaboratorSchema = (image: ImageFn, ref: RefFn) =>
+  z
+    .object({
+      name: text(1),
+      kind: z.enum(['organisation', 'person']),
+      what: text(1, 120),
+      url: z.url().optional(),
+      since: z.number().int().min(1990).max(2100),
+      ongoing: z.boolean(),
+      logo: image().optional(),
+      logo_alt: z.string().optional(),
+      projects: z.array(ref('projects')).default([]),
+      consent: z.literal(true),
+    })
+    .refine((c) => hasAlt(c.logo, c.logo_alt), { message: 'A logo needs logo_alt', path: ['logo_alt'] });
+
 export const siteSchema = z.object({
   email: z.email().optional(),
+  facebook: z.url().optional(),
+  vision: text(10, 200).optional(),
+  principles: z.array(z.object({ title: text(1, 40), line: text(1, 160) })).max(6).default([]),
 });

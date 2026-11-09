@@ -13,14 +13,16 @@ const values = (key: string) =>
     .filter(Boolean);
 
 // Fields a maintainer must write: left empty, so an unedited copy fails the build instead of going live.
-const MUST_WRITE = ['name', 'name_th', 'cohort', 'consent', 'consent_date', 'research_interest', 'index_phrase',
-  'thesis_topic', 'title', 'department', 'summary', 'year', 'area', 'date', 'kind', 'detail', 'confirmed_by', 'alt'];
+const MUST_WRITE = ['name', 'name_th', 'cohort', 'consent', 'consent_date', 'research_interest',
+  'thesis_topic', 'title', 'department', 'summary', 'year', 'area', 'date', 'kind', 'detail', 'confirmed_by', 'alt',
+  'description', 'color', 'art', 'order', 'what', 'since', 'ongoing'];
 // Optional fields with example values: commented out, so examples can't go live by accident.
 const OPTIONAL = ['photo', 'photo_alt', 'image', 'image_alt', 'profile_url', 'link', 'next', 'contributors',
-  'orcid', 'scholar', 'github', 'linkedin', 'email', 'source_url'];
+  'orcid', 'scholar', 'github', 'linkedin', 'email', 'source_url',
+  'match_topics', 'match_titles', 'url', 'logo', 'logo_alt', 'projects', 'openalex'];
 
 describe('README templates', () => {
-  it('found all five templates', () => expect(blocks.length).toBeGreaterThanOrEqual(5));
+  it('found all seven templates', () => expect(blocks.length).toBeGreaterThanOrEqual(7));
   it('leave every must-write field empty', () => {
     for (const k of MUST_WRITE) expect(values(k), k).toEqual([]);
   });

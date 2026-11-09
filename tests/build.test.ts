@@ -80,16 +80,8 @@ describe('home: hero, projects, latest', () => {
   });
 });
 
-describe('home: we work on, in progress, work with us, about', () => {
+describe('home: in progress, work with us, about', () => {
   const h = () => built('index.html');
-  it('lists every phrase as a link with no JS (Review Focus 4)', () => {
-    for (const id of ['ann-a', 'ben-b', 'cara-c', 'dee-d']) expect(h()).toContain(`href="/people/#${id}"`);
-    expect(h()).not.toMatch(/<li[^>]*class="[^"]*\bon\b/);
-  });
-  it('ships the Pause button hidden until cycling starts, with no conflicting toggle state', () => {
-    expect(h()).toMatch(/<button[^>]*\bhidden\b[^>]*>\s*Pause\s*</);
-    expect(h()).not.toContain('aria-pressed');
-  });
   it('makes [hidden] win over pill styles', () =>
     expect(builtCss().replace(/\s/g, '')).toContain('[hidden]{display:none!important}'));
   it('reflows at 320px: grids never demand more than the screen width (WCAG 1.4.10)', () => {
@@ -105,7 +97,7 @@ describe('home: we work on, in progress, work with us, about', () => {
     expect(h()).toContain('Four medical students earning an MSc in Data Science and Health Informatics alongside the MD'));
   it('keeps the approved section order', () => {
     const s = h();
-    const at = ['projects', 'latest', 'we-work-on', 'in-progress', 'work-with-us', 'about'].map(id => s.indexOf(`id="${id}"`));
+    const at = ['projects', 'latest', 'in-progress', 'work-with-us', 'about'].map(id => s.indexOf(`id="${id}"`));
     expect(at.every((p, i) => p > -1 && (i === 0 || p > at[i - 1]))).toBe(true);
   });
 });

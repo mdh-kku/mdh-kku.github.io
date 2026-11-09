@@ -1,6 +1,17 @@
 import { defineCollection, reference } from 'astro:content';
 import { file, glob } from 'astro/loaders';
-import { advisorSchema, heroSchema, personSchema, projectSchema, siteSchema, updateSchema } from './lib/schemas';
+import {
+  advisorSchema,
+  areaSchema,
+  collaboratorSchema,
+  correctionSchema,
+  heroSchema,
+  personSchema,
+  projectSchema,
+  publicationSchema,
+  siteSchema,
+  updateSchema,
+} from './lib/schemas';
 
 // Real content lives in src/content; tests point this at fake fixtures (tests/global-setup.ts).
 const base = process.env.MDH_CONTENT ?? './src/content';
@@ -13,4 +24,15 @@ export const collections = {
   updates: defineCollection({ loader: md('updates'), schema: updateSchema(reference) }),
   hero: defineCollection({ loader: md('hero'), schema: ({ image }) => heroSchema(image) }),
   site: defineCollection({ loader: file(`${base}/site.json`), schema: siteSchema }),
+  areas: defineCollection({ loader: md('areas'), schema: areaSchema }),
+  // Written by scripts/import-publications.mjs. Corrections are hand-edited and keyed by OpenAlex work id.
+  publications: defineCollection({ loader: file(`${base}/publications.json`), schema: publicationSchema(reference) }),
+  corrections: defineCollection({
+    loader: file(`${base}/publication-corrections.json`),
+    schema: correctionSchema(reference),
+  }),
+  collaborators: defineCollection({
+    loader: md('collaborators'),
+    schema: ({ image }) => collaboratorSchema(image, reference),
+  }),
 };

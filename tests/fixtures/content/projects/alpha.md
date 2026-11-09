@@ -2,7 +2,7 @@
 name: Alpha
 summary: Fake featured project used only in tests.
 year: 2024
-area: Rehabilitation
+area: rehab-fx
 image: ./alpha.jpg
 image_alt: Fake photo of the Alpha project
 team: [ann-a]

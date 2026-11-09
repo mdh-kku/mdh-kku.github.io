@@ -1,0 +1,158 @@
+[
+  {
+    "id": "W1",
+    "title": "Fake paper one about <i>voice</i> games",
+    "year": 2026,
+    "date": "2026-03-01",
+    "type": "article",
+    "venue": "Fake Journal A",
+    "doi": "https://doi.org/10.0000/w1",
+    "pdf": "https://example.org/w1.pdf",
+    "open_access": true,
+    "authors": 5,
+    "cited_by": 3,
+    "advisors": [
+      "adv-one"
+    ],
+    "areas": [
+      "rehab-fx"
+    ]
+  },
+  {
+    "id": "W2",
+    "title": "Fake paper two",
+    "year": 2026,
+    "date": "2026-01-15",
+    "type": "article",
+    "venue": "Fake Journal B",
+    "doi": "https://doi.org/10.0000/w2",
+    "free": "https://example.org/pmc/w2",
+    "free_at": "PubMed Central",
+    "open_access": true,
+    "authors": 3,
+    "cited_by": 9,
+    "advisors": [
+      "adv-two"
+    ],
+    "areas": [
+      "imaging-fx"
+    ]
+  },
+  {
+    "id": "W3",
+    "title": "Fake paper three",
+    "year": 2025,
+    "type": "article",
+    "venue": "Fake Journal C",
+    "doi": "https://doi.org/10.0000/w3",
+    "free": "https://doi.org/10.0000/w3",
+    "open_access": true,
+    "authors": 4,
+    "cited_by": 1,
+    "advisors": [
+      "adv-one"
+    ],
+    "areas": [
+      "data-fx"
+    ]
+  },
+  {
+    "id": "W4",
+    "title": "Fake paper four",
+    "year": 2025,
+    "type": "article",
+    "venue": "Fake Journal A",
+    "doi": "https://doi.org/10.0000/w4",
+    "open_access": false,
+    "authors": 2,
+    "cited_by": 0,
+    "advisors": [
+      "adv-one",
+      "adv-two"
+    ],
+    "areas": []
+  },
+  {
+    "id": "W5",
+    "title": "Fake dataset five",
+    "year": 2026,
+    "date": "2026-04-01",
+    "type": "dataset",
+    "venue": "Fake Repository",
+    "doi": "https://doi.org/10.0000/w5",
+    "open_access": true,
+    "authors": 3,
+    "cited_by": 0,
+    "advisors": [
+      "adv-two"
+    ],
+    "areas": [
+      "data-fx"
+    ]
+  },
+  {
+    "id": "W6",
+    "title": "Fake review six, then filler words that keep a very long title wrapping on narrow screens that keep a very long title wrapping on narrow screens that keep a very long title wrappin",
+    "year": 2023,
+    "type": "review",
+    "venue": "Fake Journal With An Unusually Long Name For Testing Wrapping At Narrow Widths",
+    "url": "https://example.org/w6",
+    "open_access": false,
+    "authors": 7,
+    "cited_by": 2,
+    "advisors": [
+      "adv-two"
+    ],
+    "areas": [
+      "imaging-fx",
+      "data-fx"
+    ]
+  },
+  {
+    "id": "W7",
+    "title": "Fake preprint seven",
+    "year": 2022,
+    "type": "preprint",
+    "doi": "https://doi.org/10.0000/w7",
+    "open_access": true,
+    "authors": 2,
+    "cited_by": 0,
+    "advisors": [
+      "adv-one"
+    ],
+    "areas": [
+      "rehab-fx"
+    ]
+  },
+  {
+    "id": "W8",
+    "title": "งานวิจัยปลอมแปด",
+    "year": 2021,
+    "type": "article",
+    "venue": "วารสารปลอม",
+    "open_access": false,
+    "authors": 4,
+    "cited_by": 0,
+    "advisors": [
+      "adv-one"
+    ],
+    "areas": []
+  },
+  {
+    "id": "W9",
+    "title": "Fake paper nine",
+    "year": 2020,
+    "type": "article",
+    "venue": "Fake Journal D",
+    "doi": "https://doi.org/10.0000/w9",
+    "open_access": false,
+    "authors": 3,
+    "cited_by": 5,
+    "advisors": [
+      "adv-two"
+    ],
+    "areas": [
+      "papers-fx"
+    ]
+  }
+]

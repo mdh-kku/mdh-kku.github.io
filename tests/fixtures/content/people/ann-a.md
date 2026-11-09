@@ -7,7 +7,6 @@ photo_alt: Ann Alpha
 consent: true
 consent_date: 2026-11-01
 research_interest: Fake student for tests. Focuses on early warning of clinical deterioration from routine hospital records.
-index_phrase: early warning from vital signs
 thesis_topic: Predicting deterioration from routine vital signs.
 advisors: [adv-one]
 links:

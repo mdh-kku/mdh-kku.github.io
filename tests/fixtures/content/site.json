@@ -1,1 +1,26 @@
-[{ "id": "contact", "email": "lab@example.org" }]
+[
+  {
+    "id": "contact",
+    "email": "lab@example.org",
+    "facebook": "https://example.org/facebook",
+    "vision": "Fake vision for tests: every fake patient gets the best fake care.",
+    "principles": [
+      {
+        "title": "Fake principle one",
+        "line": "Fake line one."
+      },
+      {
+        "title": "Fake principle two",
+        "line": "Fake line two."
+      },
+      {
+        "title": "Fake principle three",
+        "line": "Fake line three."
+      },
+      {
+        "title": "Fake principle four",
+        "line": "Fake line four."
+      }
+    ]
+  }
+]

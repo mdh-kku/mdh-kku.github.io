@@ -27,7 +27,6 @@ cohort:               # admission year, e.g. 2023
 consent:              # write true only after they agreed in writing to everything in this file
 consent_date:         # YYYY-MM-DD, e.g. 2026-11-15
 research_interest:    # 1–2 sentences in the third person, 20–300 characters
-index_phrase:         # 3–6 lowercase words for "We work on:", e.g. early warning from vital signs
 thesis_topic:         # a general description, not the exact title (10–160 characters)
 advisors: [somsri]    # ids of files in src/content/advisors
 # photo: ./somchai.jpg            # optional
@@ -41,7 +40,7 @@ advisors: [somsri]    # ids of files in src/content/advisors
 ---
 ```
 
-The student list, "We work on:" and "In progress" appear once there are at least 3 people. Check your work with `npm test && npm run build`.
+The student list and "In progress" appear once there are at least 3 people. Check your work with `npm test && npm run build`.
 
 ## Add an advisor
 
@@ -57,10 +56,30 @@ consent:              # write true only after they agreed
 # photo: ./somsri.jpg             # optional
 # photo_alt: Somsri Rakdee        # required when there is a photo
 # profile_url: https://…          # optional
+# openalex: [A…, A…]              # optional, one line: their OpenAlex author ids, read only by the publication import
+# orcid: https://orcid.org/…      # optional
 ---
 ```
 
 "Supervises: …" is worked out from the students' `advisors` lists. Never type it. Check with `npm test && npm run build`.
+
+## Add a research area
+
+Create `src/content/areas/<id>.md`. The `<id>` is short and lowercase (for example `rehabilitation`). Projects point at it with `area:`, and links to the area use it.
+
+```md
+---
+name:                 # e.g. Rehabilitation (at most 40 characters)
+description:          # one line on what the area covers, 10–140 characters
+color:                # a hex colour for its picture, in quotes, e.g. "#2f5fd0"
+art:                  # picture style: wave, cells, flow, scatter, rings or hexes
+order:                # its place among the areas, e.g. 1
+# match_topics: 'rehabilitation|speech therapy'   # optional, one line: OpenAlex topics that put a paper in this area
+# match_titles: 'dysphagia|aphasia'               # optional, one line: title words that put a paper in this area
+---
+```
+
+Check with `npm test && npm run build`.
 
 ## Add a project
 
@@ -71,7 +90,7 @@ Create `src/content/projects/<id>.md`:
 name:                 # e.g. SPEAK SPARK!
 summary:              # one line on what it does, at most 120 characters
 year:                 # e.g. 2025
-area:                 # e.g. Rehabilitation
+area:                 # id of a file in src/content/areas, e.g. rehabilitation
 team: [somchai]       # ids of people who have consented
 advisors: [somsri]
 featured: false       # true puts it first
@@ -113,7 +132,28 @@ Create `src/content/hero/<id>.md` and put the cleaned photo next to it. The hero
 image:                # the photo next to this file, e.g. ./lab-day.jpg
 alt:                  # what the photo shows
 consent:              # write true only after everyone in the photo agreed
-color: false          # true keeps this one photo in colour
+# color: true                    # optional: keeps this one photo in colour
+---
+```
+
+Check with `npm test && npm run build`.
+
+## Add a collaborator
+
+Create `src/content/collaborators/<id>.md` only after the organisation or person has agreed to be listed. The Collaborators section appears once there is at least one.
+
+```md
+---
+name:                 # their official name
+kind:                 # organisation or person
+what:                 # one line on who they are or what we did together, at most 120 characters
+since:                # the year the work started, e.g. 2024
+ongoing:              # true if the work is still going, false if it is past
+consent:              # write true only after they agreed in writing to be listed
+# url: https://…                      # optional: their website
+# logo: ./logo.png                    # optional: put the file next to this one
+# logo_alt: The organisation's name   # required when there is a logo
+# projects: [speak-spark]             # optional: ids of projects you did together
 ---
 ```
 
