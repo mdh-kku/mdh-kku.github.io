@@ -39,4 +39,13 @@ describe('README: removing someone', () => {
     expect(section).toMatch(/contributors/);
     expect(section).toMatch(/history/i);
   });
+  it('tells the maintainer to re-run the publication import', () => expect(section).toMatch(/import-publications/));
+});
+
+describe('README: importing publications', () => {
+  const section = readme.split('## Import publications')[1]?.split('\n## ')[0] ?? '';
+  it('explains the import, the API key and the corrections file', () => {
+    expect(section).toContain('OPENALEX_API_KEY');
+    expect(section).toContain('publication-corrections.json');
+  });
 });

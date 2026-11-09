@@ -2,7 +2,7 @@
 
 The website of **MDH Lab: Laboratory for Medicine, Data & Health**, Faculty of Medicine, Khon Kaen University. Its members are medical students earning an MSc in Data Science and Health Informatics alongside the MD.
 
-Every person, advisor, project, update and hero photo is one small file in `src/content/`. The site builds every page from those files, so you never edit the same fact in two places. The build also checks the files: if something required is missing, it stops and tells you which file to fix, so nothing half-finished can go live.
+Every person, principal investigator, research area, project, update, collaborator and hero photo is one small file in `src/content/`; publications come from a script (see Import publications). The site builds every page from those files, so you never edit the same fact in two places. The build also checks the files: if something required is missing, it stops and tells you which file to fix, so nothing half-finished can go live.
 
 > **This repository is public.** Only add someone after they have agreed to everything in their file.
 
@@ -40,7 +40,7 @@ advisors: [somsri]    # ids of files in src/content/advisors
 ---
 ```
 
-The student list and "In progress" appear once there are at least 3 people. Check your work with `npm test && npm run build`.
+Students appear on the home page and the People page once there are at least 3. Check your work with `npm test && npm run build`.
 
 ## Add an advisor
 
@@ -61,7 +61,7 @@ consent:              # write true only after they agreed
 ---
 ```
 
-"Supervises: …" is worked out from the students' `advisors` lists. Never type it. Check with `npm test && npm run build`.
+Advisors appear on the site as principal investigators, as equals with the students. "Advises: …" is worked out from the students' `advisors` lists. Never type it. Check with `npm test && npm run build`.
 
 ## Add a research area
 
@@ -165,15 +165,36 @@ Check with `npm test && npm run build`.
 2. Search `src/content` for their id and remove it from every `team`, `advisors` and `people` list.
 3. Search for their name and remove it from any `contributors` list. Those are plain names, not ids, so the id search misses them.
 4. Remove every hero photo and project image they appear in.
-5. Run `npm test && npm run build`. If anything still points at them, the build stops with a message naming the file, for example: `Project "x" lists people "somchai", but there is no file people/somchai.md`.
+5. If they are a principal investigator, re-run the publication import (`node scripts/import-publications.mjs`, see Import publications) so their works leave `publications.json`. Until you do, the build stops with `Publication "W…" lists advisors "…", but there is no file advisors/….md`.
+6. Run `npm test && npm run build`. If anything still points at them, the build stops with a message naming the file, for example: `Project "x" lists people "somchai", but there is no file people/somchai.md`.
 
 Deleting a file removes it from the live site, but it stays in the repository's public git history. Erasing it completely means rewriting that history and asking GitHub Support to clear cached views. Agree this with the lab's principal investigator first.
+
+## Import publications
+
+The Research & publications page lists every work by the principal investigators who have a file in `src/content/advisors/` with an `openalex:` line. The list lives in `src/content/publications.json`, written by a script you run by hand. The site itself never calls OpenAlex.
+
+1. Put each principal investigator's OpenAlex author ids in their file, on one line: `openalex: [A5027417160, A5040071245]` (some people have two records).
+2. Preview: `node scripts/import-publications.mjs --dry-run`. It prints how many works each person has, how many land in each research area and in "Other", and how many show no Khon Kaen University affiliation. Ask that person to check those.
+3. Import: `node scripts/import-publications.mjs`. Review the diff of `publications.json`, run `npm test && npm run build`, then commit.
+4. If OpenAlex asks for an API key, give it only to your terminal, never to a file: `OPENALEX_API_KEY=… node scripts/import-publications.mjs` (in PowerShell, first `$env:OPENALEX_API_KEY="…"`).
+
+Research areas are assigned by the `match_topics` and `match_titles` patterns in each area's file. Fixes go in `src/content/publication-corrections.json`, never in `publications.json` (the next import would undo them). Key each fix by the work's OpenAlex id:
+
+```json
+{
+  "W4385721234": { "areas": ["rehabilitation"] },
+  "W4391234567": { "hidden": true }
+}
+```
+
+`areas` replaces the areas the import picked; `hidden` takes the work off the site. Before launch, each principal investigator approves their own list.
 
 ## How publishing works
 
 - **Stage 1:** every push to `main` runs the tests and, if they pass, publishes the site to GitHub Pages automatically through GitHub Actions.
 - **Stage 2:** an official MDKKU web address will point to the same site.
-- The lab's contact email lives in `src/content/site.json`, as `[{ "id": "contact", "email": "…" }]`. Until it's set, the Contact and Work with us buttons stay hidden.
+- `src/content/site.json` holds the lab's contact email, the MSc's Facebook page, the vision and the principles shown under Goals & culture: `[{ "id": "contact", "email": "…", "facebook": "https://…", "vision": "…", "principles": [{ "title": "…", "line": "…" }] }]`. Each shows only once it is set: without an email the Contact and Work with us buttons stay hidden, and without a vision so does Goals & culture.
 - To change the image shown when the site is shared on LINE or Facebook, edit `scripts/og.html` and re-render `public/og.png` (instructions are inside that file).
 
 ## Rules
@@ -184,4 +205,4 @@ Deleting a file removes it from the live site, but it stays in the repository's 
 - **Dates are written YYYY-MM-DD.** The build rejects 07/03/2026 rather than guessing the month.
 - **No drafts, intake answers or unapproved photos** in the repository, even temporarily.
 - **No photos or details that could identify a patient.**
-- **Numbers are counted, not typed.** Counts such as "Nine theses underway" are computed from the files.
+- **Numbers are counted, not typed.** Counts such as "267 works · 2007–2026 · 178 free to read" are computed from the files.
