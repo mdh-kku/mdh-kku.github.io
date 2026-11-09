@@ -103,7 +103,7 @@ describe('home: hero, latest', () => {
   });
 });
 
-describe('home: work with us, about', () => {
+describe('home: goals, collaborators, work with us', () => {
   const h = () => built('index.html');
   it('makes [hidden] win over pill styles', () =>
     expect(builtCss().replace(/\s/g, '')).toContain('[hidden]{display:none!important}'));
@@ -111,12 +111,24 @@ describe('home: work with us, about', () => {
     expect(h()).toContain('mailto:lab@example.org?subject=Collaboration%20with%20MDH%20Lab');
     expect(h()).toContain('mailto:lab@example.org?subject=Funding%20for%20MDH%20Lab');
   });
-  it('shows the about lead', () =>
-    expect(h()).toContain('Four medical students earning an MSc in Data Science and Health Informatics alongside the MD'));
   it('keeps the approved section order', () => {
     const s = h();
-    const at = ['research', 'publications', 'people', 'latest', 'work-with-us', 'about'].map(id => s.indexOf(`id="${id}"`));
+    const at = ['research', 'publications', 'people', 'latest', 'goals', 'collaborators', 'work-with-us'].map((id) => s.indexOf(`id="${id}"`));
     expect(at.every((p, i) => p > -1 && (i === 0 || p > at[i - 1]))).toBe(true);
+    for (const gone of ['about', 'projects', 'in-progress', 'we-work-on']) expect(s).not.toContain(`id="${gone}"`);
+  });
+  it('sets the vision as the Goals & culture heading, then numbered principles', () => {
+    const goals = h().match(/<section[^>]*id="goals"[\s\S]*?<\/section>/)?.[0] ?? '';
+    expect(goals).toContain('Goals &amp; culture');
+    expect(goals).toMatch(/<h2[^>]*>Fake vision for tests: every fake patient gets the best fake care\.<\/h2>/);
+    const principles = [...goals.matchAll(/>(\d\d)<\/span>\s*<h3[^>]*>([^<]*)<\/h3>/g)].map((m) => `${m[1]} ${m[2]}`);
+    expect(principles).toEqual(['01 Fake principle one', '02 Fake principle two', '03 Fake principle three', '04 Fake principle four']);
+  });
+  it('lists collaborators with a link, what they are and since when', () => {
+    const c = h().match(/<section[^>]*id="collaborators"[\s\S]*?<\/section>/)?.[0] ?? '';
+    expect(c).toMatch(/<a href="https:\/\/example\.org\/clinic"[^>]*>Fake Clinic<\/a>/);
+    expect(c).toContain('A fake partner clinic for tests.');
+    expect(c).toContain('Since 2024 · ongoing');
   });
 });
 

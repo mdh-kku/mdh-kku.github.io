@@ -1,8 +1,5 @@
 /** Pure display rules: ordering, counts, visibility and copy. No Astro imports, so tests can use them directly. */
 
-const WORDS = ['one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'];
-const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
-
 /** Featured projects first, then newest year first. */
 export function orderProjects<T extends { featured: boolean; year: number }>(items: T[], max = 6): T[] {
   return [...items].sort((a, b) => Number(b.featured) - Number(a.featured) || b.year - a.year).slice(0, max);
@@ -16,20 +13,6 @@ export function latestFirst<T extends { date: Date }>(items: T[], max = 4): T[] 
 /** Launch rule: a section with fewer than `min` items stays hidden instead of looking empty. */
 export function showSection(count: number, min = 3): boolean {
   return count >= min;
-}
-
-/** 1–10 as a word, anything else as digits. */
-export function numberWord(n: number): string {
-  return WORDS[n - 1] ?? String(n);
-}
-
-export function aboutLead(n: number): string {
-  // Before anyone is added there is no number to show, never "0 medical students".
-  const who = n < 1 ? 'Medical students' : `${cap(numberWord(n))} medical ${n === 1 ? 'student' : 'students'}`;
-  return (
-    `${who} earning an MSc in Data Science and Health Informatics ` +
-    'alongside the MD, working with faculty advisors at the Faculty of Medicine, Khon Kaen University.'
-  );
 }
 
 /** Ids of the people whose advisors include `advisorId`. */

@@ -1,0 +1,83 @@
+---
+import { twoDigits } from '../lib/site';
+
+interface Props {
+  vision?: string;
+  principles: { title: string; line: string }[];
+}
+
+const { vision, principles } = Astro.props;
+---
+
+{
+  vision && (
+    <section class="container goals" id="goals">
+      <p class="label">Goals &amp; culture</p>
+      <h2 class="headline goal">{vision}</h2>
+      {principles.length > 0 && (
+        <ol class="principles">
+          {principles.map((p, i) => (
+            <li>
+              <span class="label">{twoDigits(i + 1)}</span>
+              <h3>{p.title}</h3>
+              <p>{p.line}</p>
+            </li>
+          ))}
+        </ol>
+      )}
+    </section>
+  )
+}
+
+<style>
+  .goals {
+    padding-block: 96px 24px;
+  }
+
+  /* The lab's aim, set large. */
+  .goal {
+    max-width: 24ch;
+    font-size: clamp(1.75rem, 1.2rem + 2.2vw, 2.75rem);
+  }
+
+  .principles {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 40px;
+    margin: 40px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  li {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr);
+    column-gap: 12px;
+    padding: 22px 0;
+    border-top: 1px solid rgba(18, 19, 23, 0.16);
+  }
+
+  li .label {
+    grid-row: 1 / span 2;
+    padding-top: 7px;
+  }
+
+  h3 {
+    font-size: clamp(1.25rem, 1rem + 0.8vw, 1.5rem);
+    font-weight: 650;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+
+  li p {
+    max-width: 46ch;
+    margin-top: 6px;
+    color: var(--ink-2);
+  }
+
+  @media (max-width: 760px) {
+    .principles {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

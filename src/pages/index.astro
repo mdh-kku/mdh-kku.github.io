@@ -6,7 +6,8 @@ import PublicationsFinder from '../components/PublicationsFinder.astro';
 import Latest from '../components/Latest.astro';
 import People from '../components/People.astro';
 import WorkWithUs from '../components/WorkWithUs.astro';
-import About from '../components/About.astro';
+import Goals from '../components/Goals.astro';
+import Collaborators from '../components/Collaborators.astro';
 import { loadSite } from '../lib/content';
 import { showSection, visibleAreas } from '../lib/site';
 
@@ -25,6 +26,7 @@ const areasShown = showSection(visibleAreas(site.areas, site.projects, site.publ
   <PublicationsFinder publications={site.publications} areas={site.areas} />
   <People people={site.people} advisors={site.advisors} />
   <Latest updates={site.updates} />
+  <Goals vision={site.vision} principles={site.principles} />
+  <Collaborators collaborators={site.collaborators} />
   {site.email && <WorkWithUs email={site.email} />}
-  <About count={site.people.length} />
 </Base>

@@ -1,0 +1,80 @@
+---
+import { Image } from 'astro:assets';
+import SectionHeading from './SectionHeading.astro';
+import type { CollaboratorView } from '../lib/content';
+
+interface Props {
+  collaborators: CollaboratorView[];
+}
+
+// Only organisations and people who agreed to be listed have a file; the section hides until there is one.
+const collaborators = [...Astro.props.collaborators].sort((a, b) => a.name.localeCompare(b.name));
+---
+
+{
+  collaborators.length > 0 && (
+    <section class="container collabs" id="collaborators">
+      <SectionHeading title="Collaborators" />
+      <ul class="grid">
+        {collaborators.map((c) => (
+          <li class="item">
+            {c.logo && <Image class="logo" src={c.logo} alt={c.logoAlt!} width={160} />}
+            <h3>{c.url ? <a href={c.url} target="_blank" rel="noopener">{c.name}</a> : c.name}</h3>
+            <p class="what">{c.what}</p>
+            <p class="label">Since {c.since} · {c.ongoing ? 'ongoing' : 'past'}</p>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
+<style>
+  .collabs {
+    padding-block: 88px 24px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr));
+    gap: 12px;
+    margin: 28px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .item {
+    display: grid;
+    gap: 6px;
+    align-content: start;
+    padding: 18px;
+    border-radius: 18px;
+    background: var(--band);
+  }
+
+  /* Logos keep their own colours; cropped with object-fit because <Image> gets a width only. */
+  .item > :global(.logo) {
+    width: 80px;
+    height: 48px;
+    margin-bottom: 4px;
+    object-fit: contain;
+    object-position: left center;
+  }
+
+  h3 {
+    font-size: 18px;
+    font-weight: 650;
+    letter-spacing: -0.01em;
+    line-height: 1.25;
+  }
+
+  h3 a {
+    color: var(--ink);
+    text-underline-offset: 3px;
+  }
+
+  .what {
+    font-size: 15px;
+    color: var(--ink-2);
+  }
+</style>

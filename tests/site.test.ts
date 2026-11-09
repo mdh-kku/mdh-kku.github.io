@@ -14,12 +14,6 @@ describe('display rules', () => {
     expect(s.latestFirst(u).map(x => x.id)).toEqual(['2025-12-03', '2025-08-15', '2025-02-01', '2024-06-01']);
   });
   it('hides sections under 3 items', () => { expect(s.showSection(2)).toBe(false); expect(s.showSection(3)).toBe(true); });
-  it('writes the about copy', () => {
-    expect(s.aboutLead(1).startsWith('One medical student earning')).toBe(true);
-    expect(s.aboutLead(9)).toBe('Nine medical students earning an MSc in Data Science and Health Informatics alongside the MD, working with faculty advisors at the Faculty of Medicine, Khon Kaen University.');
-  });
-  it('never writes "0 medical students" before anyone is added', () =>
-    expect(s.aboutLead(0)).toBe('Medical students earning an MSc in Data Science and Health Informatics alongside the MD, working with faculty advisors at the Faculty of Medicine, Khon Kaen University.'));
   it('finds who an advisor supervises', () =>
     expect(s.supervisedBy('adv-one', [{ id: 'ann-a', advisorIds: ['adv-one'] }, { id: 'ben-b', advisorIds: ['adv-two'] }])).toEqual(['ann-a']));
   it('builds a mailto link with an encoded subject', () =>
