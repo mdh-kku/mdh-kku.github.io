@@ -192,7 +192,8 @@ Research areas are assigned by the `match_topics` and `match_titles` patterns in
 
 ## How publishing works
 
-- **Stage 1:** every push to `main` runs the tests and, if they pass, publishes the site to GitHub Pages automatically through GitHub Actions.
+- **Now (demo):** every push to the `redesign` branch runs the tests and, if they pass, publishes a demo to <https://mdh-kku.github.io> through GitHub Actions (`.github/workflows/deploy.yml`). The demo shows the full design filled with invented test content, and search engines are told not to list it.
+- **Going live:** once people have agreed and the redesign is merged into `main`, delete the `MDH_CONTENT` line in `.github/workflows/deploy.yml` and deploy from `main`. The site then shows the real content in `src/content/`.
 - **Stage 2:** an official MDKKU web address will point to the same site.
 - `src/content/site.json` holds the lab's contact email, the MSc's Facebook page, the vision and the principles shown under Goals & culture: `[{ "id": "contact", "email": "…", "facebook": "https://…", "vision": "…", "principles": [{ "title": "…", "line": "…" }] }]`. Each shows only once it is set: without an email the Contact and Work with us buttons stay hidden, and without a vision so does Goals & culture.
 - To change the image shown when the site is shared on LINE or Facebook, edit `scripts/og.html` and re-render `public/og.png` (instructions are inside that file).

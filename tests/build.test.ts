@@ -11,6 +11,8 @@ describe('fixture build', () => {
 
 describe('layout', () => {
   const h = () => built('index.html');
+  it('keeps a build from other content (tests, the demo) out of search engines', () =>
+    expect(h()).toContain('<meta name="robots" content="noindex">'));
   it('loads only the agreed fonts', () => {
     expect(h()).toContain('Google+Sans+Flex:wght,ROND@400..700,60');
     expect(h()).toContain('IBM+Plex+Mono:wght@500');

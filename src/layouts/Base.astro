@@ -11,6 +11,8 @@ interface Props {
 }
 
 const { title, description, email, facebook } = Astro.props;
+// Built from other content than src/content (the test fixtures, the public demo): keep it out of search engines.
+const notRealContent = Boolean(process.env.MDH_CONTENT);
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const shareImage = new URL('/og.png', Astro.site);
 
@@ -26,6 +28,7 @@ const FONTS =
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
+    {notRealContent && <meta name="robots" content="noindex" />}
     <link rel="canonical" href={canonical} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="sitemap" href="/sitemap.xml" />

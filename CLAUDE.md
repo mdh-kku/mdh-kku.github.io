@@ -143,12 +143,9 @@ Done in CSS, with no script: People hover/focus links (`peopleLinkCss` writes `:
 
 ## Status and deployment
 
-- Stage 1 is on branch `stage-1`; the redesign is on branch `redesign`. Going live is waiting on people:
-  - the owner's GitHub organization (planned `mdh-kku`)
-  - a public repository named exactly `<org>.github.io`, with Pages set to deploy from GitHub Actions
-  - at least 3 consented members, the principal investigators' consent and their publication lists, the confirmed research areas
-  - the lab email
-- Then: set `site` in `astro.config.mjs`, and add `.github/workflows/deploy.yml` (`actions/checkout@v7`, `withastro/action@v6` with `build-cmd: npm test && npm run build`, `actions/deploy-pages@v5`). Use Node 22 or 24 in CI; Node 22 reaches end of life in April 2027.
+- Stage 1 is on branch `stage-1`; the redesign is on branch `redesign`. GitHub: organization `mdh-kku`, public repository `mdh-kku/mdh-kku.github.io`, Pages deployed by GitHub Actions; `site` in `astro.config.mjs` is `https://mdh-kku.github.io`.
+- **The live address shows a demo.** `.github/workflows/deploy.yml` (`actions/checkout@v7`, `withastro/action@v6` on Node 24 with `build-cmd: npm test && npm run build`, `actions/deploy-pages@v5`) deploys branch `redesign` with `MDH_CONTENT` set to the test fixtures; `Base.astro` adds `noindex` to any build from other content than `src/content`. Before the first push, git history was rewritten to remove a principal investigator's name from the README, so commit IDs in older local ledgers are pre-rewrite.
+- Going live with real content is waiting on people: at least 3 consented members, the principal investigators' consent and their publication lists, the confirmed research areas, the vision line, the lab email. Then merge into `main`, delete the `MDH_CONTENT` line and deploy from `main`. Node 22 reaches end of life in April 2027.
 - Stage 2: an official MDKKU subdomain via `public/CNAME`, plus an updated `site`.
 - On this Windows machine, the Playwright and DevTools MCP browsers hang. For visual checks use headless Edge (`msedge --headless=new --screenshot=… --window-size=…`). Edge won't open narrower than about 500px, so check phone widths by putting the page in a 360px iframe on a same-origin test page; root-relative assets need a server, not `file://`.
 - Headless Edge pitfalls:

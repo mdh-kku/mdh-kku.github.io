@@ -1,0 +1,42 @@
+# Publishes the site to GitHub Pages (https://mdh-kku.github.io), only after the tests pass.
+#
+# For now this publishes a DEMO: the full design, filled with the invented test content and hidden from search
+# engines (Base.astro adds noindex to any build from other content than src/content).
+# To publish the real content: delete the MDH_CONTENT line below, and deploy from `main` once the redesign is merged.
+name: Deploy
+
+on:
+  push:
+    branches: [redesign]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      MDH_CONTENT: ./tests/fixtures/content
+    steps:
+      - uses: actions/checkout@v7
+      - uses: withastro/action@v6
+        with:
+          node-version: 24
+          build-cmd: npm test && npm run build
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5
