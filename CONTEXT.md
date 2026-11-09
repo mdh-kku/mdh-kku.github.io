@@ -22,8 +22,12 @@ _Avoid_: generation, batch, class
 ## People & research
 
 **Advisor**:
-A faculty member who supervises a student's MSc thesis (อาจารย์ที่ปรึกษา).
+A faculty member who supervises a student's MSc thesis (อาจารย์ที่ปรึกษา). Used for that link: "Advisor: …" on a student, "Advises: …" on a Principal investigator.
 _Avoid_: supervisor, mentor
+
+**Principal investigator**:
+A faculty member who leads research in the Lab; the same people are the students' Advisors. The site shows Principal investigators and students as equals, in one list.
+_Avoid_: supervisor, mentor, professor
 
 **Research interest**:
 A one- to two-sentence statement of what a person studies.
@@ -37,16 +41,28 @@ _Avoid_: thesis title
 A piece of work by lab members with a named team, such as SPEAK SPARK! or Kidney Guide. No single project is the site's central story.
 _Avoid_: flagship, product, protagonist
 
+**Research area**:
+A field the Lab works in, such as Rehabilitation or Pathology. Each Project sits in one; a Research area is broader than any one person's Research interest.
+_Avoid_: theme, field, topic (Thesis topic means a student's thesis)
+
 **Update**:
 A dated, sourced item shown under Latest: an award, a milestone, a talk, or a paper.
 _Avoid_: news post, achievement (an award is one kind of Update)
 
+**Publication**:
+A published work by an Advisor or a Cohort member, such as a journal article, review, conference paper, dataset or book chapter, listed under Research & publications with its DOI or link. It can sit in more than one Research area.
+_Avoid_: output, paper (when you mean any type)
+
 **Contributor**:
 A person outside the Cohort who is credited on a lab project, such as a non-MDH medical student.
-_Avoid_: collaborator (that word means a Partner), member
+_Avoid_: collaborator (that means someone listed under Collaborators), member
+
+**Collaborator**:
+An organisation or person outside the Lab that has worked with it, in the past or now, and has agreed to be listed under Collaborators.
+_Avoid_: partner (a Partner is the site's audience), sponsor
 
 ## Audience
 
 **Partner**:
-A funder, collaborator, researcher, or other university the site must win over. The site's only audience.
+A funder, would-be collaborator, researcher, or other university the site must win over. The site's only audience.
 _Avoid_: stakeholder, industry, applicant

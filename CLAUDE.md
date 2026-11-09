@@ -8,7 +8,9 @@ Static website for **MDH Lab: Laboratory for Medicine, Data & Health**: one coho
 
 **The repository is public.** Only content that people have consented to may be committed. `.gitignore` deliberately excludes `old work/`, `.superpowers/`, `content-notes.md` and `docs/superpowers/`, because they contain names of people who haven't consented. Never force-add them.
 
-Use the terms in `CONTEXT.md` (MDH Lab, MSc, Cohort, Advisor, Partner, Contributor, Project, Update, Research interest, Thesis topic). The approved design and the implementation plan are local-only files in `docs/superpowers/specs/` and `docs/superpowers/plans/`. The executor's progress ledger (every ruling made during the build) is `.superpowers/sdd/2026-11-08-mdh-website/progress.md`.
+Use the terms in `CONTEXT.md` (MDH Lab, MSc, Cohort, Advisor, Principal investigator, Partner, Contributor, Collaborator, Project, Research area, Publication, Update, Research interest, Thesis topic). The approved designs and implementation plans are local-only, dated files in `docs/superpowers/specs/` and `docs/superpowers/plans/`. The stage-1 executor's progress ledger (every ruling made during that build) is `.superpowers/sdd/2026-11-08-mdh-website/progress.md`.
+
+**A redesign is approved and planned but not built yet.** Spec: `docs/superpowers/specs/2026-11-09-mdh-redesign-design.md`. Plan (10 tasks, on a branch `redesign` cut from `stage-1`): `docs/superpowers/plans/2026-11-09-mdh-redesign.md`. Decision log: `.superpowers/brainstorm/2026-11-09-decisions.md`. Reference mockups: `.superpowers/brainstorm/mdh-home-new-look.html`, `mdh-publications.html` and `mdh-research-stage.html`. The plan deliberately removes things this file still describes: "We work on:", the two-tone headings, the black bands, the Media Lab section order, the Projects / In progress / About sections, and `index_phrase`. Don't restore them. Until the plan's tasks land, everything below describes the code as it is.
 
 ## Commands
 
@@ -88,7 +90,7 @@ The script in `WeWorkOn.astro`. It highlights one phrase every 3 seconds. The Pa
 - `[hidden]{display:none!important}` is global, because `.pill` sets `display`.
 - Hover motion is gated by `@media (hover: hover) and (pointer: fine)`. Only cards that link somewhere lift on hover; their single link is stretched over the whole card.
 - Grids use `minmax(min(Npx, 100%), 1fr)` so the page reflows at 320px (WCAG 1.4.10).
-- The hero `<h1>` is a thin "Laboratory for" above a bold "Medicine, / Data & / Health". The lines are left-aligned inside a centered block so that M-D-H line up.
+- The hero `<h1>` has two lines: a small thin "Laboratory for" above a bold "Medicine, Data & Health" on one line, left-aligned inside a centered block. Below 540px the name breaks once, after "Medicine,". It's a real `<br>`, hidden at 540px and up, which keeps the block snug and centered. The `6.2vw` font size keeps the long line clear of the hero photos at 1200px and up.
 - "Learn more" links carry hidden text (" about <project>") for screen readers and search engines.
 
 ## Tests
@@ -129,3 +131,9 @@ The script in `WeWorkOn.astro`. It highlights one phrase every 3 seconds. The Pa
 - Then: set `site` in `astro.config.mjs`, and add `.github/workflows/deploy.yml` (`actions/checkout@v7`, `withastro/action@v6` with `build-cmd: npm test && npm run build`, `actions/deploy-pages@v5`). Use Node 22 or 24 in CI; Node 22 reaches end of life in April 2027.
 - Stage 2: an official MDKKU subdomain via `public/CNAME`, plus an updated `site`.
 - On this Windows machine, the Playwright and DevTools MCP browsers hang. For visual checks use headless Edge (`msedge --headless=new --screenshot=… --window-size=…`). Edge won't open narrower than about 500px, so check phone widths by putting the page in a 360px iframe on a same-origin test page; root-relative assets need `npm run preview`, not `file://`.
+- Headless Edge pitfalls:
+  - With `--virtual-time-budget`, CSS transitions look frozen mid-way. Screenshot settled states with `*{transition:none!important}` injected.
+  - Animation driven by `requestAnimationFrame` only advances with a `window.requestAnimationFrame = cb => setTimeout(() => cb(performance.now()), 16)` shim injected first.
+  - To assert behaviour, inject a script that acts on the page and writes results into a `<pre>`, then read it with `--dump-dom`.
+  - Screenshots of `#hash` URLs, and pages with `will-change` on very large layers, can come out blank.
+- The machine runs low on memory: Claude Code has killed preview servers before. Don't start long-running servers without asking, and only one `astro preview` can run per project.

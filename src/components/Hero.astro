@@ -24,7 +24,7 @@ const shown = heroPhotosToShow(photos);
   }
   <div class="container text">
     <p class="label">Faculty of Medicine · Khon Kaen University</p>
-    <h1><span class="pre">Laboratory for</span> Medicine, <br />Data &amp; <br />Health</h1>
+    <h1><span class="pre">Laboratory for</span> Medicine, <br />Data &amp; Health</h1>
     <div class="actions">
       <a class="pill" href="#projects">See our projects</a>
       {hasContact && <a class="pill pill--out" href="#work-with-us">Work with us</a>}
@@ -50,15 +50,23 @@ const shown = heroPhotosToShow(photos);
     position: relative;
   }
 
-  /* Centred as a block, lines aligned left, so the first letters spell M-D-H down one edge. */
+  /* Two lines, centred as a block and aligned left. The vw size keeps the long line clear of the hero photos. */
   h1 {
     display: inline-block;
     margin: 20px auto 30px;
-    font-size: clamp(3rem, 8vw, 6rem);
+    font-size: clamp(2.75rem, 6.2vw, 6rem);
     font-weight: 600;
     letter-spacing: -0.04em;
     line-height: 0.95;
     text-align: left;
+    text-wrap: balance;
+  }
+
+  /* Phones break the name once, after "Medicine,". A real break keeps the block snug and centred. */
+  @media (min-width: 540px) {
+    h1 br {
+      display: none;
+    }
   }
 
   /* LIDS-style contrast: the formal part thin and small, the three words bold. */
