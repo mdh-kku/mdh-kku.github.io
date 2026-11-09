@@ -1,15 +1,17 @@
 ---
 import Base from '../layouts/Base.astro';
 import Hero from '../components/Hero.astro';
+import ResearchAreas from '../components/ResearchAreas.astro';
 import PublicationsFinder from '../components/PublicationsFinder.astro';
-import Projects from '../components/Projects.astro';
 import Latest from '../components/Latest.astro';
 import InProgress from '../components/InProgress.astro';
 import WorkWithUs from '../components/WorkWithUs.astro';
 import About from '../components/About.astro';
 import { loadSite } from '../lib/content';
+import { showSection, visibleAreas } from '../lib/site';
 
 const site = await loadSite();
+const areasShown = showSection(visibleAreas(site.areas, site.projects, site.publications).length);
 ---
 
 <Base
@@ -18,9 +20,9 @@ const site = await loadSite();
   email={site.email}
   facebook={site.facebook}
 >
-  <Hero photos={site.hero} hasContact={Boolean(site.email)} />
+  <Hero photos={site.hero} hasContact={Boolean(site.email)} researchHref={areasShown ? '#research' : '/research/'} />
+  <ResearchAreas areas={site.areas} projects={site.projects} publications={site.publications} />
   <PublicationsFinder publications={site.publications} areas={site.areas} />
-  <Projects projects={site.projects} />
   <Latest updates={site.updates} />
   <InProgress people={site.people} />
   {site.email && <WorkWithUs email={site.email} />}

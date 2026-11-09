@@ -56,7 +56,7 @@ describe('people page', () => {
   it('gives every image a non-empty alt', () => expect(h()).not.toMatch(/<img(?![^>]*\balt="[^"]+")[^>]*>/));
 });
 
-describe('home: hero, projects, latest', () => {
+describe('home: hero, latest', () => {
   const h = () => built('index.html');
   it('has the full name as the only h1', () => {
     expect(h().match(/<h1[\s>]/g)).toHaveLength(1);
@@ -64,17 +64,6 @@ describe('home: hero, projects, latest', () => {
     expect(text).toBe('Laboratory for Medicine, Data &amp; Health');
   });
   it('shows four hero photos', () => expect(h().match(/class="[^"]*\bhero-photo\b/g)).toHaveLength(4));
-  it('orders projects featured first, then newest', () => {
-    const s = h();
-    expect(s.indexOf('>Alpha<')).toBeLessThan(s.indexOf('>Beta<'));
-    expect(s.indexOf('>Beta<')).toBeLessThan(s.indexOf('>Gamma<'));
-  });
-  it('shows Learn more only for projects with a link', () => expect(h().match(/>\s*Learn more\s*</g)).toHaveLength(1));
-  it("shows a project's next stage on its card", () => expect(h()).toMatch(/class="next"[^>]*>Next: clinical stage</));
-  it('credits contributors on projects, not on People', () => {
-    expect(h()).toContain('Zed Outside');
-    expect(built('people/index.html')).not.toContain('Zed Outside');
-  });
   it('shows the 4 newest updates, newest first', () => {
     const s = h();
     expect(s).not.toContain('Update 2024-01-10');
@@ -100,7 +89,7 @@ describe('home: in progress, work with us, about', () => {
     expect(h()).toContain('Four medical students earning an MSc in Data Science and Health Informatics alongside the MD'));
   it('keeps the approved section order', () => {
     const s = h();
-    const at = ['projects', 'latest', 'in-progress', 'work-with-us', 'about'].map(id => s.indexOf(`id="${id}"`));
+    const at = ['research', 'publications', 'latest', 'in-progress', 'work-with-us', 'about'].map(id => s.indexOf(`id="${id}"`));
     expect(at.every((p, i) => p > -1 && (i === 0 || p > at[i - 1]))).toBe(true);
   });
 });
@@ -124,6 +113,52 @@ describe('the new look', () => {
     expect(builtCss().replace(/\s/g, '')).toContain('h1,h2,h3,h4,p,li,dd{overflow-wrap:anywhere}'));
   it('crossfades between pages instead of cutting', () =>
     expect(builtCss().replace(/\s/g, '')).toContain('@view-transition{navigation:auto}'));
+});
+
+describe('home: research areas', () => {
+  const h = () => built('index.html');
+  const section = () => h().match(/<section[^>]*id="research"[\s\S]*?<\/section>/)?.[0] ?? '';
+  const panel = (id: string) => section().match(new RegExp(`<article[^>]*id="panel-${id}"[\\s\\S]*?</article>`))?.[0] ?? '';
+  const SHOWN = ['rehab-fx', 'imaging-fx', 'data-fx', 'papers-fx'];
+
+  it('shows the section under its plain heading', () => expect(section()).toContain('Research areas'));
+  it('has a tab and a panel for each area with work, in order', () => {
+    const tabs = [...section().matchAll(/role="tab"[^>]*id="tab-([^"]+)"/g)].map((m) => m[1]);
+    const panels = [...section().matchAll(/role="tabpanel"[^>]*id="panel-([^"]+)"/g)].map((m) => m[1]);
+    expect(tabs).toEqual(SHOWN);
+    expect(panels).toEqual(SHOWN);
+    expect(section()).toMatch(/id="tab-rehab-fx"[^>]*aria-selected="true"/);
+  });
+  it('gives every panel a pause button and keeps every panel readable without JS', () => {
+    for (const id of SHOWN) {
+      expect(panel(id), id).toContain('aria-label="Pause motion"');
+      expect(panel(id), id).not.toMatch(/^<article[^>]*\s(hidden|inert)[\s>=]/);
+    }
+  });
+  it('sums up each area and links to all of its research', () => {
+    expect(panel('rehab-fx')).toContain('1 project · 1 publication');
+    expect(panel('imaging-fx')).toContain('1 project · 2 publications');
+    expect(panel('data-fx')).toContain('1 project · 4 publications');
+    expect(panel('papers-fx')).toMatch(/>1 publication</);
+    expect(panel('rehab-fx')).toContain('href="/research/?area=rehab-fx"');
+  });
+  it("shows each area's latest paper", () => {
+    expect(panel('rehab-fx')).toContain('Fake paper one about');
+    expect(panel('imaging-fx')).toContain('Fake paper two');
+    expect(panel('data-fx')).toContain('Fake paper three');
+    expect(panel('papers-fx')).toContain('Fake paper nine');
+  });
+  it('lists the projects, or says there are none yet', () => {
+    expect(panel('rehab-fx')).toContain('Alpha');
+    expect(panel('papers-fx')).toContain('No student projects here yet. This area’s work so far is our principal investigators’ publications.');
+  });
+  it('leaves out an area with no work', () => expect(section()).not.toContain('empty-fx'));
+  it('points the hero at the research', () => expect(h()).toMatch(/<a[^>]*href="#research"[^>]*>See our research<\/a>/));
+  it('keeps the pictures paused unless they are playing', () => {
+    expect(builtCss()).toContain('prefers-reduced-motion');
+    expect(builtCss()).toMatch(/\.anim[^{]*\{[^}]*animation-play-state:\s*paused/);
+  });
+  it('fades the play and pause icons in instead of swapping them', () => expect(builtCss()).toContain('@starting-style'));
 });
 
 describe("home: what we've published", () => {
@@ -242,8 +277,6 @@ describe('sharing and hygiene', () => {
     expect(built('404.html')).toContain('Page not found');
     expect(built('404.html')).toContain('It may have moved.');
   });
-  it('names the project inside "Learn more" for screen readers and search engines', () =>
-    expect(built('index.html')).toMatch(/Learn more<span class="sr-only"[^>]*> about Alpha<\/span>/));
   it('keeps heading order on People: an h2 before the student names', () =>
     expect(built('people/index.html')).toMatch(/<h2[^>]*class="sr-only"[^>]*>Students<\/h2>/));
   it('has a 1200×630 share image', async () => {

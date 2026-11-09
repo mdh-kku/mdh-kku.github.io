@@ -1,0 +1,664 @@
+---
+import SectionHeading from './SectionHeading.astro';
+import ProjectCard from './ProjectCard.astro';
+import type { AreaView, ProjectView, PublicationView } from '../lib/content';
+import { areaArt } from '../lib/art';
+import {
+  countsLine,
+  latestPublication,
+  orderProjects,
+  publicationButtons,
+  showSection,
+  twoDigits,
+  visibleAreas,
+} from '../lib/site';
+
+interface Props {
+  areas: AreaView[];
+  projects: ProjectView[];
+  publications: PublicationView[];
+}
+
+const { projects, publications } = Astro.props;
+const areas = visibleAreas(Astro.props.areas, projects, publications);
+const slides = areas.map((a, i) => {
+  const own = orderProjects(
+    projects.filter((p) => p.area.id === a.id),
+    Infinity,
+  );
+  const latest = latestPublication(publications, a.id);
+  return {
+    ...a,
+    number: `${twoDigits(i + 1)} / ${twoDigits(areas.length)}`,
+    own,
+    counts: countsLine(own.length, publications.filter((p) => p.areas.includes(a.id)).length),
+    latest,
+    latestHref: latest && publicationButtons(latest).at(-1)!.href,
+  };
+});
+---
+
+{
+  showSection(slides.length) && (
+    <section class="areas" id="research" aria-labelledby="areas-h">
+      {/* Runs before the slides are drawn, so there is no flash of the plain list when JavaScript is on. */}
+      <script is:inline>document.currentScript.parentElement.classList.add('js');</script>
+      <div class="container">
+        <SectionHeading title="Research areas" id="areas-h" />
+        <div class="bar">
+          <div class="ix-scroll" data-scroll>
+            <div class="ix">
+              <div class="ix-base" role="tablist" aria-label="Research areas">
+                {slides.map((a, i) => (
+                  <button type="button" role="tab" id={`tab-${a.id}`} aria-controls={`panel-${a.id}`} aria-selected={String(i === 0)} tabindex={i === 0 ? 0 : -1}>{a.name}</button>
+                ))}
+              </div>
+              <div class="ix-top" aria-hidden="true" data-top>
+                {slides.map((a) => <span>{a.name}</span>)}
+              </div>
+            </div>
+          </div>
+          <div class="arrows">
+            <button type="button" class="arrow" data-prev aria-label="Previous area" aria-disabled="true">
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.5 4.5 7 10l5.5 5.5" /></svg>
+            </button>
+            <button type="button" class="arrow" data-next aria-label="Next area">
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7.5 4.5 5.5 5.5-5.5 5.5" /></svg>
+            </button>
+          </div>
+        </div>
+        <div class="stage" data-stage>
+          {slides.map((a) => (
+            <article class="slide" role="tabpanel" id={`panel-${a.id}`} aria-labelledby={`tab-${a.id}`} style={`--c:${a.color}`}>
+              <div class="main">
+                <div class="media">
+                  <svg viewBox="0 0 380 220" preserveAspectRatio="xMidYMid slice" aria-hidden="true" set:html={areaArt(a.art, a.color, a.order * 97 + 13)}></svg>
+                  {/* Anything that plays by itself must be stoppable (WCAG 2.2.2). Pausing one pauses all. */}
+                  <button type="button" class="play" data-play aria-label="Pause motion">
+                    <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="3.5" y="2.5" width="3" height="11" rx="1" /><rect x="9.5" y="2.5" width="3" height="11" rx="1" /></svg>
+                  </button>
+                </div>
+                <div class="text">
+                  <p class="label">{a.number}</p>
+                  <h3>{a.name}</h3>
+                  <p class="line">{a.description}</p>
+                </div>
+              </div>
+              <aside class="side" aria-label={`Work in ${a.name}`}>
+                <p class="label">In this area</p>
+                {a.own.length > 0 ? (
+                  <ul class="projects">
+                    {a.own.map((p) => (
+                      <li>
+                        <ProjectCard project={p} compact />
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p class="empty">No student projects here yet. This area’s work so far is our principal investigators’ publications.</p>
+                )}
+                {a.latest && (
+                  <a class="pub" href={a.latestHref} target="_blank" rel="noopener" draggable="false">
+                    <span class="label">Latest publication</span>
+                    <span class="pub-title">{a.latest.title}</span>
+                    <span class="pub-meta">{a.latest.venue ?? 'Venue not listed'} · {a.latest.year} <span aria-hidden="true">↗</span></span>
+                  </a>
+                )}
+                <a class="all" href={`/research/?area=${a.id}`} draggable="false">
+                  <span>All research in {a.name}<span class="label">{a.counts}</span></span>
+                  <span aria-hidden="true">→</span>
+                </a>
+              </aside>
+              <div class="shade" />
+            </article>
+          ))}
+        </div>
+        <p class="sr-only" aria-live="polite" data-status />
+      </div>
+    </section>
+  )
+}
+
+<script>
+  import { initAreaSlides } from '../scripts/area-slides';
+
+  const section = document.getElementById('research');
+  if (section) initAreaSlides(section);
+</script>
+
+<style>
+  .areas {
+    overflow-x: clip; /* waiting slides sit off-screen to the right */
+    padding-block: 72px;
+    background: var(--band);
+  }
+
+  /* Tabs, arrows and the play buttons need the script; without it the slides are a plain list. */
+  .areas:not(.js) .bar,
+  .areas:not(.js) .play {
+    display: none;
+  }
+
+  .bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 26px;
+  }
+
+  .ix-scroll {
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .ix-scroll::-webkit-scrollbar {
+    display: none;
+  }
+
+  .ix {
+    position: relative;
+    width: max-content;
+  }
+
+  .ix-base,
+  .ix-top {
+    display: flex;
+    gap: 2px;
+    padding: 4px;
+  }
+
+  .ix-base > button,
+  .ix-top > span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    padding: 0 18px;
+    border: 0;
+    border-radius: 999px;
+    background: none;
+    font: inherit;
+    font-size: 15px;
+    font-weight: 550;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .ix-base > button {
+    color: var(--ink-2);
+    cursor: pointer;
+  }
+
+  .ix-base > button:focus-visible {
+    outline-offset: -3px;
+  }
+
+  /* A dark copy of the names, clipped to the current one, so the colour swap is exact. Until the script has placed
+     it, the selected tab is marked directly. */
+  .ix-top {
+    position: absolute;
+    inset: 0;
+    background: var(--ink);
+    pointer-events: none;
+    clip-path: inset(0 100% 0 0);
+  }
+
+  .ix-top > span {
+    color: var(--white);
+  }
+
+  .ix:not(.is-ready) [aria-selected='true'] {
+    background: var(--ink);
+    color: var(--white);
+  }
+
+  .arrows {
+    display: flex;
+    flex: none;
+    gap: 8px;
+  }
+
+  .arrow {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: var(--white);
+    color: var(--ink);
+    box-shadow:
+      0 0 0 1px rgba(18, 19, 23, 0.1),
+      0 2px 6px rgba(18, 19, 23, 0.06);
+    cursor: pointer;
+    transition:
+      transform 160ms var(--ease-out),
+      opacity 160ms ease;
+  }
+
+  .arrow:active {
+    transform: scale(0.94);
+  }
+
+  .arrow[aria-disabled='true'] {
+    opacity: 0.35;
+    cursor: default;
+  }
+
+  .arrow[aria-disabled='true']:active {
+    transform: none;
+  }
+
+  .arrow svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  /* Without the script: a stacked list. With it: every slide shares one grid cell, so the stage is as tall as the
+     tallest slide and the pile lines up; the script only moves them. */
+  .stage {
+    display: grid;
+    gap: 16px;
+    margin-top: 14px;
+  }
+
+  .areas.js .stage {
+    gap: 0;
+    touch-action: pan-y;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  .areas.js .slide {
+    grid-area: 1 / 1;
+    transform-origin: 0 50%;
+  }
+
+  .areas.js .slide:not(:first-child) {
+    visibility: hidden; /* until the script places them */
+  }
+
+  .stage.is-dragging,
+  .stage.is-dragging * {
+    cursor: grabbing !important;
+  }
+
+  .slide {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+    gap: 10px;
+    padding: 10px;
+    border-radius: 30px;
+    background: var(--white);
+    box-shadow:
+      0 0 0 1px rgba(18, 19, 23, 0.06),
+      0 1px 2px rgba(18, 19, 23, 0.04),
+      0 30px 60px -30px rgba(20, 40, 90, 0.35);
+  }
+
+  /* Seen slides wash out as they join the pile. */
+  .shade {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    border-radius: inherit;
+    background: var(--band);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .media {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border-radius: 20px;
+    background: color-mix(in srgb, var(--c) 9%, #fff);
+  }
+
+  .media > svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* A glass button over the picture. */
+  .play {
+    position: absolute;
+    right: 12px;
+    bottom: 12px;
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.72);
+    -webkit-backdrop-filter: blur(12px) saturate(160%);
+    backdrop-filter: blur(12px) saturate(160%);
+    color: var(--ink);
+    box-shadow:
+      0 1px 2px rgba(18, 19, 23, 0.1),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    transition: transform 160ms var(--ease-out);
+  }
+
+  .play:active {
+    transform: scale(0.94);
+  }
+
+  /* The new icon fades in rather than snapping between play and pause. */
+  .play :global(svg) {
+    width: 16px;
+    height: 16px;
+    transition:
+      opacity 150ms var(--ease-out),
+      scale 150ms var(--ease-out);
+  }
+
+  @starting-style {
+    .play :global(svg) {
+      opacity: 0;
+      scale: 0.95;
+    }
+  }
+
+  @media (prefers-reduced-transparency: reduce) {
+    .play {
+      background: var(--white);
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+  }
+
+  .text {
+    padding: 20px 14px 14px;
+  }
+
+  .text h3 {
+    margin-top: 6px;
+    font-size: clamp(1.75rem, 0.8rem + 4.2vw, 3.25rem);
+    font-weight: 650;
+    letter-spacing: -0.035em;
+    line-height: 1.02;
+    hyphens: auto;
+  }
+
+  .line {
+    max-width: 50ch;
+    margin-top: 10px;
+    font-size: clamp(1rem, 0.92rem + 0.3vw, 1.125rem);
+    line-height: 1.45;
+    color: var(--ink-2);
+  }
+
+  .side {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 14px 12px 12px;
+  }
+
+  .projects {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .empty {
+    padding: 14px 16px;
+    border-radius: 16px;
+    background: var(--band);
+    font-size: 14px;
+    line-height: 1.45;
+    color: var(--ink-2);
+  }
+
+  .pub {
+    display: grid;
+    gap: 4px;
+    padding: 14px 4px 4px;
+    border-top: 1px solid rgba(18, 19, 23, 0.1);
+    color: var(--ink);
+    text-decoration: none;
+    -webkit-user-drag: none;
+  }
+
+  .pub-title {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.35;
+  }
+
+  .pub-meta {
+    font-size: 13.5px;
+    color: var(--grey);
+  }
+
+  .all {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: auto;
+    padding: 14px 16px;
+    border-radius: 16px;
+    color: var(--ink);
+    font-weight: 600;
+    text-decoration: none;
+    box-shadow: inset 0 0 0 1px var(--line);
+    -webkit-user-drag: none;
+    transition:
+      background-color 150ms ease,
+      scale 160ms var(--ease-out);
+  }
+
+  .all:active {
+    scale: 0.98;
+  }
+
+  .all .label {
+    display: block;
+    margin-top: 2px;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .all:hover {
+      background: var(--band);
+    }
+
+    .pub:hover .pub-title {
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+  }
+
+  /* The pictures play like a muted clip, in the area's colour. Oscillations ease in and out; constant motion is
+     linear. Paused unless the script marks the stage as playing (front slide only, only while on screen). */
+  .media :global(.talk) {
+    animation: talk 1.4s ease-in-out infinite;
+  }
+
+  @keyframes talk {
+    0%,
+    100% {
+      transform: scaleY(0.55);
+    }
+    50% {
+      transform: scaleY(1.05);
+    }
+  }
+
+  .media :global(.drift) {
+    animation: drift 7s ease-in-out infinite alternate;
+  }
+
+  @keyframes drift {
+    from {
+      transform: translateX(-8px);
+    }
+    to {
+      transform: translateX(8px);
+    }
+  }
+
+  .media :global(.detect) {
+    animation: detect 2.6s ease-in-out infinite;
+  }
+
+  @keyframes detect {
+    0%,
+    100% {
+      transform: scale(0.8);
+      opacity: 0.25;
+    }
+    50% {
+      transform: scale(1.12);
+      opacity: 1;
+    }
+  }
+
+  /* 84px is a whole number of both dash patterns (6+6 and 2+5), so the loop has no visible seam. */
+  .media :global(.march) {
+    animation: march 4.2s linear infinite;
+  }
+
+  @keyframes march {
+    to {
+      stroke-dashoffset: -84;
+    }
+  }
+
+  .media :global(.blink) {
+    animation: blink 3.2s ease-in-out infinite;
+  }
+
+  @keyframes blink {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.35;
+    }
+  }
+
+  .media :global(.pulse) {
+    animation: pulse 2.8s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%,
+    100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.14);
+    }
+  }
+
+  .media :global(.orbit) {
+    animation: orbit 48s linear infinite;
+  }
+
+  @keyframes orbit {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* After the shorthands above, which reset the play state. */
+  .media :global(.anim) {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation-play-state: paused;
+  }
+
+  .media :global(.drift),
+  .media :global(.orbit) {
+    transform-box: view-box;
+    transform-origin: 190px 110px;
+  }
+
+  .stage.is-playing .slide.is-current :global(.anim) {
+    animation-play-state: running;
+  }
+
+  @media (max-width: 760px) {
+    .areas {
+      padding-block: 48px;
+    }
+
+    .bar {
+      margin-top: 20px;
+    }
+
+    .arrows {
+      display: none; /* touch: swipe the slide or tap a name */
+    }
+
+    .ix-scroll {
+      margin-inline: -20px;
+      padding-inline: 16px;
+      -webkit-mask-image: linear-gradient(90deg, transparent, #000 16px, #000 calc(100% - 16px), transparent);
+      mask-image: linear-gradient(90deg, transparent, #000 16px, #000 calc(100% - 16px), transparent);
+    }
+
+    .slide {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: auto 1fr;
+      gap: 6px;
+      padding: 8px;
+      border-radius: 24px;
+    }
+
+    .media {
+      aspect-ratio: 16 / 11;
+      border-radius: 17px;
+    }
+
+    .text {
+      padding: 14px 10px 2px;
+    }
+
+    .side {
+      padding: 8px 2px 2px;
+    }
+  }
+
+  /* Reduced motion: no travel (the script fades slides in place), no press scaling, and nothing plays by itself;
+     the play button still works, so the picture animations are not removed here. */
+  @media (prefers-reduced-motion: reduce) {
+    .arrow,
+    .play {
+      transition: none;
+    }
+
+    .arrow:active,
+    .play:active {
+      transform: none;
+    }
+
+    .all {
+      transition: background-color 150ms ease;
+    }
+
+    .all:active {
+      scale: none;
+    }
+
+    .play :global(svg) {
+      transition: opacity 150ms ease;
+    }
+  }
+</style>

@@ -6,9 +6,11 @@ import { heroPhotosToShow } from '../lib/site';
 interface Props {
   photos: HeroPhoto[];
   hasContact: boolean;
+  /** `#research` when the research-area slides show; the full research page otherwise, so it is never a dead link. */
+  researchHref: string;
 }
 
-const { photos, hasContact } = Astro.props;
+const { photos, hasContact, researchHref } = Astro.props;
 // Four fixed slots near the edges; shapes follow the approved mockup.
 const SHAPES = ['shape-circle', 'shape-pill', 'shape-arch', 'shape-square'];
 const shown = heroPhotosToShow(photos);
@@ -26,7 +28,7 @@ const shown = heroPhotosToShow(photos);
     <p class="label">Faculty of Medicine · Khon Kaen University</p>
     <h1><span class="pre">Laboratory for</span> Medicine, <br />Data &amp; Health</h1>
     <div class="actions">
-      <a class="pill" href="#projects">See our projects</a>
+      <a class="pill" href={researchHref}>See our research</a>
       {hasContact && <a class="pill pill--out" href="#work-with-us">Work with us</a>}
     </div>
   </div>
