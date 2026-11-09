@@ -155,3 +155,20 @@ export function typeLabel(type: string): string {
 export function twoDigits(n: number): string {
   return String(n).padStart(2, '0');
 }
+
+/** The lab people who appear on publications, A to Z, with how many works each: the "Person" filter. */
+export function peopleOnPublications(pubs: { people: { key: string; name: string }[] }[]) {
+  const byKey = new Map<string, { key: string; name: string; count: number }>();
+  for (const p of pubs.flatMap((w) => w.people)) {
+    byKey.set(p.key, { key: p.key, name: p.name, count: (byKey.get(p.key)?.count ?? 0) + 1 });
+  }
+  return [...byKey.values()].sort((a, b) => a.name.localeCompare(b.name));
+}
+
+/** One filter pill per area, counting the items listed under it, then "Other" for items in no area. */
+export function areaPills(areas: { id: string; name: string }[], items: { areas: string[] }[]) {
+  return [
+    ...areas.map((a) => ({ id: a.id, name: a.name, count: items.filter((i) => i.areas.includes(a.id)).length })),
+    { id: 'other', name: 'Other', count: items.filter((i) => i.areas.length === 0).length },
+  ];
+}

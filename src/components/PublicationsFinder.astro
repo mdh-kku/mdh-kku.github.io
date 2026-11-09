@@ -1,0 +1,84 @@
+---
+import SectionHeading from './SectionHeading.astro';
+import PublicationFilters from './PublicationFilters.astro';
+import PublicationRow from './PublicationRow.astro';
+import type { AreaView, PublicationView } from '../lib/content';
+import { areaPills, byNewest, isPaper, peopleOnPublications, recentPublications, showSection, statsLine } from '../lib/site';
+
+interface Props {
+  publications: PublicationView[];
+  areas: AreaView[];
+}
+
+const pubs = byNewest(Astro.props.publications);
+const recent = new Set(recentPublications(pubs).map((p) => p.id));
+const areaNames = Object.fromEntries(Astro.props.areas.map((a) => [a.id, a.name]));
+const years = [...new Set(pubs.map((p) => p.year))].sort((a, b) => b - a);
+// ponytail: every row ships in the HTML and the script only hides and shows them; fine for a few hundred works.
+// Past ~1000, switch to a JSON index that the finder loads on first use.
+---
+
+{
+  showSection(pubs.length, 1) && (
+    <section class="container pubs" id="publications">
+      <SectionHeading label="Research & publications" title="What we've published" />
+      <p class="label stats">{statsLine(pubs)}</p>
+      <div class="finder">
+        <PublicationFilters
+          action="/research/"
+          variant="home"
+          areas={areaPills(Astro.props.areas, pubs)}
+          years={years}
+          people={peopleOnPublications(pubs)}
+          total={pubs.length}
+        />
+      </div>
+      <p class="label recent" aria-live="polite" data-result-label>Recent</p>
+      <ol class="publist">
+        {pubs.map((p) => (
+          <PublicationRow pub={p} areaNames={areaNames} level={3} paper={isPaper(p.type)} hidden={!recent.has(p.id)} />
+        ))}
+      </ol>
+      <p class="empty" data-empty hidden>Nothing matches. Try another word or area.</p>
+    </section>
+  )
+}
+
+<script>
+  import { initFinder } from '../scripts/finder';
+
+  const section = document.getElementById('publications');
+  if (section) initFinder(section, { limit: 5, syncUrl: false });
+</script>
+
+<style>
+  .pubs {
+    padding-block: 88px 24px;
+  }
+
+  .stats {
+    margin-top: 12px;
+    color: var(--grey);
+  }
+
+  .finder {
+    margin-top: 24px;
+  }
+
+  .recent {
+    margin-top: 30px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(18, 19, 23, 0.16);
+  }
+
+  .publist {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .empty {
+    padding: 22px 0;
+    color: var(--ink-2);
+  }
+</style>

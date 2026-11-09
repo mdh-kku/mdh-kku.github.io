@@ -96,4 +96,13 @@ describe('areas and publications', () => {
     expect(s.isPaper('review')).toBe(true);
   });
   it('pads slide numbers to two digits', () => expect(s.twoDigits(1)).toBe('01'));
+  it('lists the people on publications A to Z, with counts', () =>
+    expect(s.peopleOnPublications([
+      { people: [{ key: 'pi-b', name: 'Bo' }] },
+      { people: [{ key: 'pi-a', name: 'Al' }, { key: 'pi-b', name: 'Bo' }] },
+    ])).toEqual([{ key: 'pi-a', name: 'Al', count: 1 }, { key: 'pi-b', name: 'Bo', count: 2 }]));
+  it('counts what sits under each area pill, with Other for items in no area', () =>
+    expect(s.areaPills([{ id: 'a', name: 'A' }, { id: 'b', name: 'B' }], [{ areas: ['a'] }, { areas: ['a', 'b'] }, { areas: [] }])).toEqual([
+      { id: 'a', name: 'A', count: 2 }, { id: 'b', name: 'B', count: 1 }, { id: 'other', name: 'Other', count: 1 },
+    ]));
 });

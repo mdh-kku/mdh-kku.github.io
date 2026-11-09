@@ -4,7 +4,7 @@ import ProjectCard from '../components/ProjectCard.astro';
 import PublicationFilters from '../components/PublicationFilters.astro';
 import PublicationRow from '../components/PublicationRow.astro';
 import { loadSite } from '../lib/content';
-import { byNewest, orderProjects } from '../lib/site';
+import { areaPills, byNewest, orderProjects, peopleOnPublications } from '../lib/site';
 
 const site = await loadSite();
 const pubs = byNewest(site.publications);
@@ -12,18 +12,9 @@ const projects = orderProjects(site.projects, Infinity);
 const areaNames = Object.fromEntries(site.areas.map((a) => [a.id, a.name]));
 
 // A pill counts everything listed under it: the area's projects and its publications.
-const inArea = (id: string) =>
-  projects.filter((p) => p.area.id === id).length + pubs.filter((p) => p.areas.includes(id)).length;
-const areas = [
-  ...site.areas.map((a) => ({ id: a.id, name: a.name, count: inArea(a.id) })),
-  { id: 'other', name: 'Other', count: pubs.filter((p) => p.areas.length === 0).length },
-];
+const areas = areaPills(site.areas, [...pubs, ...projects.map((p) => ({ areas: [p.area.id] }))]);
 const years = [...new Set([...pubs.map((p) => p.year), ...projects.map((p) => p.year)])].sort((a, b) => b - a);
-const byPerson = new Map<string, { key: string; name: string; count: number }>();
-for (const p of pubs.flatMap((w) => w.people)) {
-  byPerson.set(p.key, { key: p.key, name: p.name, count: (byPerson.get(p.key)?.count ?? 0) + 1 });
-}
-const people = [...byPerson.values()].sort((a, b) => a.name.localeCompare(b.name));
+const people = peopleOnPublications(pubs);
 const groups = [...new Set(pubs.map((p) => p.year))].map((year) => ({ year, items: pubs.filter((p) => p.year === year) }));
 const works = (n: number) => `${n} ${n === 1 ? 'work' : 'works'}`;
 ---

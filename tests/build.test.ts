@@ -126,6 +126,34 @@ describe('the new look', () => {
     expect(builtCss().replace(/\s/g, '')).toContain('@view-transition{navigation:auto}'));
 });
 
+describe("home: what we've published", () => {
+  const section = () => built('index.html').match(/<section[^>]*id="publications"[\s\S]*?<\/section>/)?.[0] ?? '';
+  const ID: [string, string][] = [['Fake paper one', 'W1'], ['Fake paper two', 'W2'], ['Fake paper three', 'W3'],
+    ['Fake paper four', 'W4'], ['Fake dataset five', 'W5'], ['Fake review six', 'W6'], ['งานวิจัยปลอมแปด', 'W8'], ['Fake paper nine', 'W9']];
+  const id = (row: string) => ID.find(([t]) => row.includes(t))?.[1];
+  const isHidden = (row: string) => /^[^>]*\shidden[\s>]/.test(row);
+  const rows = () => section().split('<li class="pubrow"').slice(1);
+
+  it('shows the computed stats line', () => expect(section()).toContain('8 works · 2020–2026 · 4 free to read'));
+  it('is a GET form to the research page with the same four filters', () => {
+    expect(section()).toMatch(/<form[^>]*action="\/research\/"[^>]*method="get"/);
+    for (const n of ['area', 'year', 'person', 'q']) expect(section()).toContain(`name="${n}"`);
+    expect(section()).toMatch(/<button type="submit"[^>]*data-see-all[^>]*>See all 8<\/button>/);
+  });
+  it('counts publications under each pill', () => {
+    const pills = [...section().matchAll(/<span[^>]*>([^<]+)<i[^>]*>(\d+)<\/i><\/span>/g)].map((m) => `${m[1]} ${m[2]}`);
+    expect(pills).toEqual(['All 8', 'Rehabilitation 1', 'Imaging 2', 'Health data 4', 'Papers only 1', 'Other 1']);
+  });
+  it('shows the five newest papers and keeps every other work hidden', () => {
+    expect(rows().filter((r) => !isHidden(r)).map(id)).toEqual(['W1', 'W2', 'W3', 'W4', 'W6']);
+    expect(rows().filter(isHidden).map(id)).toEqual(['W5', 'W8', 'W9']);
+  });
+  it('labels the list and ships its empty state hidden', () => {
+    expect(section()).toMatch(/data-result-label[^>]*>Recent</);
+    expect(section()).toMatch(/<p[^>]*hidden[^>]*>Nothing matches\. Try another word or area\.<\/p>/);
+  });
+});
+
 describe('research page', () => {
   const r = () => built('research/index.html');
   const rows = () => r().split('<li class="pubrow"').slice(1).map((s) => s.split('</li>')[0]);
