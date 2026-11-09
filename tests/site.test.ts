@@ -37,3 +37,63 @@ describe('display rules', () => {
     expect(() => s.must(undefined, msg)).toThrow(msg);
   });
 });
+
+describe('areas and publications', () => {
+  const doi = 'https://doi.org/10.0000/x';
+  const labels = (p: Parameters<typeof s.publicationButtons>[0]) => s.publicationButtons(p).map((b) => b.label);
+
+  it('writes the counts line, leaving out zeros', () => {
+    expect(s.countsLine(1, 1)).toBe('1 project · 1 publication');
+    expect(s.countsLine(0, 4)).toBe('4 publications');
+    expect(s.countsLine(0, 0)).toBe('');
+  });
+  it('writes the stats line', () => {
+    const pubs = [{ year: 2026, openAccess: true }, { year: 2020, openAccess: false }, { year: 2025, openAccess: true }];
+    expect(s.statsLine(pubs)).toBe('3 works · 2020–2026 · 2 free to read');
+    expect(s.statsLine([{ year: 2026, openAccess: false }])).toBe('1 work · 2026 · 0 free to read');
+  });
+  it('orders newest first by date (else 1 January of the year), then most cited', () => {
+    const p = [
+      { id: 'u0', year: 2025, citedBy: 0 },
+      { id: 'jan', year: 2026, date: new Date('2026-01-15'), citedBy: 0 },
+      { id: 'u1', year: 2025, citedBy: 1 },
+      { id: 'mar', year: 2026, date: new Date('2026-03-01'), citedBy: 0 },
+    ];
+    expect(s.byNewest(p).map((x) => x.id)).toEqual(['mar', 'jan', 'u1', 'u0']);
+  });
+  it('picks recent papers, skipping datasets and preprints', () => {
+    const p = [
+      { id: 'data', type: 'dataset', year: 2026, date: new Date('2026-04-01'), citedBy: 0, areas: ['a'] },
+      { id: 'pre', type: 'preprint', year: 2026, date: new Date('2026-03-15'), citedBy: 0, areas: ['a'] },
+      { id: 'art', type: 'article', year: 2026, date: new Date('2026-03-01'), citedBy: 0, areas: ['a'] },
+      { id: 'old', type: 'review', year: 2020, citedBy: 9, areas: ['b'] },
+    ];
+    expect(s.recentPublications(p).map((x) => x.id)).toEqual(['art', 'old']);
+    expect(s.latestPublication(p, 'a')?.id).toBe('art');
+    expect(s.latestPublication(p, 'none')).toBeUndefined();
+  });
+  it('shows only areas with a project or a publication, in order', () => {
+    const areas = [{ id: 'b', order: 2 }, { id: 'a', order: 1 }, { id: 'empty', order: 0 }];
+    expect(s.visibleAreas(areas, [{ area: { id: 'b' } }], [{ areas: ['a'] }]).map((a) => a.id)).toEqual(['a', 'b']);
+  });
+  it('builds publication buttons', () => {
+    expect(labels({ id: 'W1', pdf: 'https://example.org/x.pdf', doi })).toEqual(['PDF', 'DOI']);
+    const free = s.publicationButtons({ id: 'W2', free: 'https://example.org/pmc/x', freeAt: 'PubMed Central', doi });
+    expect(free.map((b) => b.label)).toEqual(['Free copy', 'DOI']);
+    expect(free[0].title).toBe('Free copy at PubMed Central');
+    expect(s.publicationButtons({ id: 'W2', free: 'https://example.org/f', doi })[0].title).toBe('Free copy at another site');
+    expect(labels({ id: 'W3', free: doi, doi })).toEqual(['DOI']);
+    expect(s.publicationButtons({ id: 'W6', url: 'https://example.org/w6' })).toEqual([{ label: 'Link', href: 'https://example.org/w6' }]);
+    expect(s.publicationButtons({ id: 'W8' })).toEqual([{ label: 'Link', href: 'https://openalex.org/W8' }]);
+  });
+  it('never gives two buttons the same address', () =>
+    expect(labels({ id: 'W9', pdf: 'https://example.org/x.pdf', url: 'https://example.org/x.pdf' })).toEqual(['PDF']));
+  it('counts co-authors, never below zero', () => expect(s.coauthors({ authors: 2, people: [1, 2] })).toBe(0));
+  it('labels every type except plain articles', () => {
+    expect(s.typeLabel('review')).toBe('Review');
+    expect(s.typeLabel('book-chapter')).toBe('Book chapter');
+    expect(s.typeLabel('article')).toBe('');
+    expect(s.isPaper('review')).toBe(true);
+  });
+  it('pads slide numbers to two digits', () => expect(s.twoDigits(1)).toBe('01'));
+});
